@@ -1,0 +1,2 @@
+-- Initial migration placeholder
+-- Run: npx prisma db push (dev) or prisma migrate dev (production)

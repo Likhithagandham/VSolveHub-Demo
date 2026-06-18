@@ -1,0 +1,151 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  phone     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  addresses     Address[]
+  bookings      Booking[]
+  savedServices SavedService[]
+  provider      Provider?
+}
+
+model Provider {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  providerType String   // captain | professional | vendor | host | studio
+  isOnline     Boolean  @default(false)
+  kycStatus    String   @default("pending") // pending | verified | rejected
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user     User              @relation(fields: [userId], references: [id])
+  services Service[]
+  offers   Offer[]
+  requests ProviderRequest[]
+  earnings Earning[]
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String?
+  icon        String?
+  parentId    String?
+  createdAt   DateTime @default(now())
+
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryTree")
+  services Service[]
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  slug        String
+  name        String
+  description String?
+  pricePaise  Int
+  archetype   String   // A | B | C | D | E | F
+  categoryId  String
+  providerId  String?
+  isPopular   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  category      Category       @relation(fields: [categoryId], references: [id])
+  provider      Provider?      @relation(fields: [providerId], references: [id])
+  bookings      Booking[]
+  savedServices SavedService[]
+
+  @@unique([slug, categoryId])
+}
+
+model Booking {
+  id          String   @id @default(cuid())
+  ref         String   @unique
+  userId      String
+  serviceId   String
+  archetype   String
+  status      String   @default("pending")
+  payload     String   // JSON booking details
+  totalPaise  Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id])
+  service Service @relation(fields: [serviceId], references: [id])
+  offers  Offer[]
+}
+
+model Address {
+  id        String   @id @default(cuid())
+  userId    String
+  label     String
+  line1     String
+  line2     String?
+  city      String
+  pincode   String
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model SavedService {
+  id        String   @id @default(cuid())
+  userId    String
+  serviceId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id])
+  service Service @relation(fields: [serviceId], references: [id])
+
+  @@unique([userId, serviceId])
+}
+
+model ProviderRequest {
+  id         String   @id @default(cuid())
+  providerId String
+  bookingId  String?
+  type       String
+  status     String   @default("pending")
+  payload    String?
+  slaHours   Int      @default(24)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  provider Provider @relation(fields: [providerId], references: [id])
+}
+
+model Offer {
+  id         String   @id @default(cuid())
+  providerId String
+  bookingId  String
+  status     String   @default("pending") // pending | accepted | declined | expired
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  provider Provider @relation(fields: [providerId], references: [id])
+  booking  Booking  @relation(fields: [bookingId], references: [id])
+}
+
+model Earning {
+  id         String   @id @default(cuid())
+  providerId String
+  amountPaise Int
+  source     String
+  status     String   @default("pending")
+  createdAt  DateTime @default(now())
+
+  provider Provider @relation(fields: [providerId], references: [id])
+}
