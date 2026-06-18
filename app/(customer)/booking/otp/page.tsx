@@ -1,54 +1,28 @@
-"use client";
+import { OtpForm } from "@/components/customer/auth/OtpForm";
+import { getServerSession } from "@/lib/auth/session";
+import { redirect } from "next/navigation";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+type PageProps = {
+  searchParams: Promise<{ redirect?: string }>;
+};
 
-export default function BookingOtpPage() {
-  const router = useRouter();
-  const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState("");
-  const [step, setStep] = useState<"phone" | "otp">("phone");
-  const [loading, setLoading] = useState(false);
+export default async function BookingOtpPage({ searchParams }: PageProps) {
+  const session = await getServerSession();
+  const { redirect: redirectTo } = await searchParams;
 
-  async function sendOtp() {
-    setLoading(true);
-    await fetch("/api/auth/otp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "send", phone }),
-    });
-    setStep("otp");
-    setLoading(false);
-  }
-
-  async function verifyOtp() {
-    setLoading(true);
-    const res = await fetch("/api/auth/otp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "verify", phone, otp }),
-    });
-    if (res.ok) router.push("/profile");
-    setLoading(false);
+  if (session) {
+    redirect(redirectTo ?? "/booking");
   }
 
   return (
-    <div className="mx-auto max-w-md space-y-4">
-      <h1 className="text-2xl font-bold text-slate-900">Verify your phone</h1>
-      <p className="text-sm text-slate-500">First-time users verify via OTP. Returning users skip this step.</p>
-      {step === "phone" ? (
-        <>
-          <Input placeholder="10-digit phone" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={10} />
-          <Button onClick={sendOtp} disabled={loading}>Send OTP</Button>
-        </>
-      ) : (
-        <>
-          <Input placeholder="6-digit OTP (use 123456)" value={otp} onChange={(e) => setOtp(e.target.value)} maxLength={6} />
-          <Button onClick={verifyOtp} disabled={loading}>Verify</Button>
-        </>
-      )}
+    <div className="auth-page">
+      <div className="auth-card">
+        <h1 className="page-title">Verify your phone</h1>
+        <p className="page-subtitle">
+          Enter your mobile number to continue booking. Demo OTP is <strong>1234</strong>.
+        </p>
+        <OtpForm redirectTo={redirectTo ?? "/booking"} />
+      </div>
     </div>
   );
 }

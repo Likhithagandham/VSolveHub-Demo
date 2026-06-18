@@ -12,93 +12,59 @@ model User {
   phone     String   @unique
   name      String?
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
+  sessions      Session[]
   addresses     Address[]
-  bookings      Booking[]
   savedServices SavedService[]
-  provider      Provider?
+  bookings      Booking[]
 }
 
-model Provider {
-  id           String   @id @default(cuid())
-  userId       String   @unique
-  providerType String   // captain | professional | vendor | host | studio
-  isOnline     Boolean  @default(false)
-  kycStatus    String   @default("pending") // pending | verified | rejected
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 
-  user     User              @relation(fields: [userId], references: [id])
-  services Service[]
-  offers   Offer[]
-  requests ProviderRequest[]
-  earnings Earning[]
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model Category {
-  id          String   @id @default(cuid())
-  slug        String   @unique
-  name        String
-  description String?
-  icon        String?
-  parentId    String?
+model Address {
+  id          String  @id @default(cuid())
+  userId      String
+  label       String
+  fullAddress String
+  isDefault   Boolean @default(false)
   createdAt   DateTime @default(now())
 
-  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id])
-  children Category[] @relation("CategoryTree")
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookings Booking[]
+}
+
+model ServiceCategory {
+  id   String @id @default(cuid())
+  name String
+  slug String @unique
+  icon String
+
   services Service[]
 }
 
 model Service {
-  id          String   @id @default(cuid())
-  slug        String
-  name        String
-  description String?
-  pricePaise  Int
-  archetype   String   // A | B | C | D | E | F
+  id          String @id @default(cuid())
   categoryId  String
-  providerId  String?
-  isPopular   Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  name        String
+  slug        String
+  description String
+  price       Int
+  duration    Int
+  tags        String @default("[]")
 
-  category      Category       @relation(fields: [categoryId], references: [id])
-  provider      Provider?      @relation(fields: [providerId], references: [id])
-  bookings      Booking[]
+  category      ServiceCategory @relation(fields: [categoryId], references: [id])
   savedServices SavedService[]
+  bookings      Booking[]
 
   @@unique([slug, categoryId])
-}
-
-model Booking {
-  id          String   @id @default(cuid())
-  ref         String   @unique
-  userId      String
-  serviceId   String
-  archetype   String
-  status      String   @default("pending")
-  payload     String   // JSON booking details
-  totalPaise  Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  user    User    @relation(fields: [userId], references: [id])
-  service Service @relation(fields: [serviceId], references: [id])
-  offers  Offer[]
-}
-
-model Address {
-  id        String   @id @default(cuid())
-  userId    String
-  label     String
-  line1     String
-  line2     String?
-  city      String
-  pincode   String
-  isDefault Boolean  @default(false)
-  createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id])
 }
 
 model SavedService {
@@ -107,45 +73,34 @@ model SavedService {
   serviceId String
   createdAt DateTime @default(now())
 
-  user    User    @relation(fields: [userId], references: [id])
-  service Service @relation(fields: [serviceId], references: [id])
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 
   @@unique([userId, serviceId])
 }
 
-model ProviderRequest {
-  id         String   @id @default(cuid())
-  providerId String
-  bookingId  String?
-  type       String
-  status     String   @default("pending")
-  payload    String?
-  slaHours   Int      @default(24)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+model Booking {
+  id           String   @id @default(cuid())
+  bookingRef   String   @unique
+  userId       String
+  serviceId    String
+  addressId    String
+  slot         String
+  status       String   @default("SEARCHING")
+  quotedAmount Int
+  createdAt    DateTime @default(now())
 
-  provider Provider @relation(fields: [providerId], references: [id])
+  user         User               @relation(fields: [userId], references: [id])
+  service      Service            @relation(fields: [serviceId], references: [id])
+  address      Address            @relation(fields: [addressId], references: [id])
+  statusLogs   BookingStatusLog[]
 }
 
-model Offer {
-  id         String   @id @default(cuid())
-  providerId String
-  bookingId  String
-  status     String   @default("pending") // pending | accepted | declined | expired
-  expiresAt  DateTime
-  createdAt  DateTime @default(now())
+model BookingStatusLog {
+  id        String   @id @default(cuid())
+  bookingId String
+  status    String
+  createdAt DateTime @default(now())
 
-  provider Provider @relation(fields: [providerId], references: [id])
-  booking  Booking  @relation(fields: [bookingId], references: [id])
-}
-
-model Earning {
-  id         String   @id @default(cuid())
-  providerId String
-  amountPaise Int
-  source     String
-  status     String   @default("pending")
-  createdAt  DateTime @default(now())
-
-  provider Provider @relation(fields: [providerId], references: [id])
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 }

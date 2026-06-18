@@ -1,10 +1,23 @@
-import { ProfileSectionPlaceholder } from "@/components/customer/profile/ProfileSections";
+import { redirect } from "next/navigation";
+import { getServerSession } from "@/lib/auth/session";
+import { ProfileNav } from "@/components/customer/profile/ProfileNav";
+import { prisma } from "@/lib/db/client";
+import { AddressManager } from "@/components/customer/profile/AddressManager";
 
-export default function ProfileAddressesPage() {
+export default async function ProfileAddressesPage() {
+  const session = await getServerSession();
+  if (!session) redirect("/booking/otp?redirect=/profile/addresses");
+
+  const addresses = await prisma.address.findMany({
+    where: { userId: session.id },
+    orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
+  });
+
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold text-slate-900">My addresses</h1>
-      <ProfileSectionPlaceholder title="Address book" />
+    <div className="page-content">
+      <h1 className="page-title">Saved addresses</h1>
+      <ProfileNav />
+      <AddressManager initialAddresses={addresses} />
     </div>
   );
 }

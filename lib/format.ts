@@ -1,6 +1,10 @@
+export function formatPrice(rupees: number): string {
+  return `₹${rupees.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+}
+
+/** @deprecated Use formatPrice — kept for compatibility */
 export function formatMoney(paise: number): string {
-  const rupees = paise / 100;
-  return `₹${rupees.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+  return formatPrice(Math.round(paise / 100));
 }
 
 export function formatDate(date: Date | string): string {

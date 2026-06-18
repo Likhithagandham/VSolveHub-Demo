@@ -1,21 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
-import { MOCK_CATEGORIES, MOCK_SERVICES, searchServices } from "@/lib/catalog/mock";
+import {
+  getAllServices,
+  getCategories,
+  getPopularServices,
+  getServiceBySlug,
+  getServicesByCategory,
+  searchServices,
+} from "@/lib/catalog/queries";
 
 export async function GET(req: NextRequest) {
-  const q = req.nextUrl.searchParams.get("q");
-  const type = req.nextUrl.searchParams.get("type");
+  const category = req.nextUrl.searchParams.get("category");
+  const slug = req.nextUrl.searchParams.get("slug");
 
-  if (type === "categories") {
-    return NextResponse.json({ categories: MOCK_CATEGORIES });
+  if (category && slug) {
+    const service = await getServiceBySlug(category, slug);
+    if (!service) {
+      return NextResponse.json({ error: "Service not found" }, { status: 404 });
+    }
+    return NextResponse.json({ service });
   }
 
-  if (q) {
-    return NextResponse.json({ services: searchServices(q) });
+  if (category) {
+    const services = await getServicesByCategory(category);
+    return NextResponse.json({ services });
   }
 
-  return NextResponse.json({
-    categories: MOCK_CATEGORIES,
-    services: MOCK_SERVICES,
-    popular: MOCK_SERVICES.filter((s) => s.isPopular),
-  });
+  const [categories, services, popular] = await Promise.all([
+    getCategories(),
+    getAllServices(),
+    getPopularServices(),
+  ]);
+
+  return NextResponse.json({ categories, services, popular });
 }

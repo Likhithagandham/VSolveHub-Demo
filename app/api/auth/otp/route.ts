@@ -4,9 +4,11 @@ import {
   sendMockOtp,
   verifyMockOtp,
   createSession,
-  SESSION_COOKIE,
+  findOrCreateUser,
+  sessionCookieOptions,
 } from "@/lib/auth/session";
 import { otpSendSchema, otpVerifySchema } from "@/lib/validation/schemas";
+import { SESSION_COOKIE } from "@/lib/constants";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -18,7 +20,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
     }
     const result = sendMockOtp(parsed.data.phone);
-    return NextResponse.json({ success: true, message: "OTP sent", devOtp: result.otp });
+    return NextResponse.json({
+      success: true,
+      message: "OTP sent to your phone",
+      devOtp: process.env.NODE_ENV === "development" ? result.otp : undefined,
+    });
   }
 
   if (action === "verify") {
@@ -30,11 +36,17 @@ export async function POST(req: NextRequest) {
     if (!valid) {
       return NextResponse.json({ error: "Invalid OTP" }, { status: 401 });
     }
-    const role = body.role === "provider" ? "provider" : "customer";
-    const token = createSession(parsed.data.phone, role);
+
+    const user = await findOrCreateUser(parsed.data.phone);
+    const { token, expiresAt } = await createSession(user.id);
+
     const cookieStore = await cookies();
-    cookieStore.set(SESSION_COOKIE, token, { httpOnly: true, path: "/", maxAge: 86400 });
-    return NextResponse.json({ success: true, role });
+    cookieStore.set(SESSION_COOKIE, token, sessionCookieOptions(expiresAt));
+
+    return NextResponse.json({
+      success: true,
+      user: { id: user.id, phone: user.phone, name: user.name },
+    });
   }
 
   return NextResponse.json({ error: "Unknown action" }, { status: 400 });

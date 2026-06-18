@@ -1,16 +1,69 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const mockAddresses = [
-  { id: "addr-1", label: "Home", line1: "123 MG Road", city: "Bangalore", pincode: "560001", isDefault: true },
-];
+import { getServerSession } from "@/lib/auth/session";
+import { prisma } from "@/lib/db/client";
+import { addressSchema } from "@/lib/validation/schemas";
 
 export async function GET() {
-  return NextResponse.json({ addresses: mockAddresses });
+  const session = await getServerSession();
+  if (!session) {
+    return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  }
+
+  const addresses = await prisma.address.findMany({
+    where: { userId: session.id },
+    orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
+  });
+
+  return NextResponse.json({ addresses });
 }
 
 export async function POST(req: NextRequest) {
+  const session = await getServerSession();
+  if (!session) {
+    return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  }
+
   const body = await req.json();
-  return NextResponse.json({
-    address: { id: `addr-${Date.now()}`, ...body },
+  const parsed = addressSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+  }
+
+  const { label, fullAddress, isDefault } = parsed.data;
+
+  if (isDefault) {
+    await prisma.address.updateMany({
+      where: { userId: session.id },
+      data: { isDefault: false },
+    });
+  }
+
+  const address = await prisma.address.create({
+    data: {
+      userId: session.id,
+      label,
+      fullAddress,
+      isDefault: isDefault ?? false,
+    },
   });
+
+  return NextResponse.json({ address });
+}
+
+export async function DELETE(req: NextRequest) {
+  const session = await getServerSession();
+  if (!session) {
+    return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  }
+
+  const id = req.nextUrl.searchParams.get("id");
+  if (!id) {
+    return NextResponse.json({ error: "Address id required" }, { status: 400 });
+  }
+
+  await prisma.address.deleteMany({
+    where: { id, userId: session.id },
+  });
+
+  return NextResponse.json({ success: true });
 }

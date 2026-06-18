@@ -2,20 +2,17 @@ import Link from "next/link";
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        <Link href="/" className="text-lg font-bold text-brand-600">
+    <header className="site-header">
+      <div className="container site-header-inner">
+        <Link href="/" className="logo">
           VSolveHub
         </Link>
-        <nav className="flex items-center gap-4 text-sm">
-          <Link href="/services" className="text-slate-600 hover:text-brand-600">
+        <nav className="nav-links">
+          <Link href="/services" className="nav-link">
             Services
           </Link>
-          <Link href="/profile" className="text-slate-600 hover:text-brand-600">
+          <Link href="/profile" className="nav-link">
             Profile
-          </Link>
-          <Link href="/partner/login" className="text-slate-600 hover:text-brand-600">
-            Partner
           </Link>
         </nav>
       </div>

@@ -1,17 +1,73 @@
-import { NextResponse } from "next/server";
-import { MOCK_SERVICES } from "@/lib/catalog/mock";
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "@/lib/auth/session";
+import { prisma } from "@/lib/db/client";
+import { serializeService } from "@/lib/catalog/queries";
+import { savedServiceSchema } from "@/lib/validation/schemas";
 
 export async function GET() {
-  const saved = MOCK_SERVICES.filter((s) => s.isPopular).slice(0, 3);
-  return NextResponse.json({ saved });
+  const session = await getServerSession();
+  if (!session) {
+    return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  }
+
+  const saved = await prisma.savedService.findMany({
+    where: { userId: session.id },
+    include: { service: { include: { category: true } } },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return NextResponse.json({
+    saved: saved.map((item) => ({
+      id: item.id,
+      service: serializeService(item.service),
+    })),
+  });
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  const session = await getServerSession();
+  if (!session) {
+    return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  }
+
   const body = await req.json();
-  return NextResponse.json({ success: true, serviceId: body.serviceId });
+  const parsed = savedServiceSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+  }
+
+  const saved = await prisma.savedService.upsert({
+    where: {
+      userId_serviceId: {
+        userId: session.id,
+        serviceId: parsed.data.serviceId,
+      },
+    },
+    update: {},
+    create: {
+      userId: session.id,
+      serviceId: parsed.data.serviceId,
+    },
+    include: { service: { include: { category: true } } },
+  });
+
+  return NextResponse.json({ saved: serializeService(saved.service) });
 }
 
-export async function DELETE(req: Request) {
-  const body = await req.json();
-  return NextResponse.json({ success: true, serviceId: body.serviceId });
+export async function DELETE(req: NextRequest) {
+  const session = await getServerSession();
+  if (!session) {
+    return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  }
+
+  const serviceId = req.nextUrl.searchParams.get("serviceId");
+  if (!serviceId) {
+    return NextResponse.json({ error: "serviceId required" }, { status: 400 });
+  }
+
+  await prisma.savedService.deleteMany({
+    where: { userId: session.id, serviceId },
+  });
+
+  return NextResponse.json({ success: true });
 }

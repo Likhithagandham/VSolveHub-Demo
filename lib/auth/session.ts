@@ -1,53 +1,80 @@
 import { cookies } from "next/headers";
+import { prisma } from "@/lib/db/client";
+import { MOCK_OTP, SESSION_COOKIE, SESSION_MAX_AGE_SECONDS } from "@/lib/constants";
+import { randomBytes } from "crypto";
 
-const SESSION_COOKIE = "vsh_session";
-const MOCK_OTP = "123456";
+export type SessionUser = {
+  id: string;
+  phone: string;
+  name: string | null;
+};
 
-// In-memory mock stores (dev only)
-const otpStore = new Map<string, string>();
-const sessions = new Map<string, { phone: string; role: "customer" | "provider" }>();
+const pendingOtps = new Map<string, string>();
 
-export function sendMockOtp(phone: string): { success: boolean; otp?: string } {
-  otpStore.set(phone, MOCK_OTP);
-  return { success: true, otp: process.env.NODE_ENV === "development" ? MOCK_OTP : undefined };
+export function sendMockOtp(phone: string) {
+  pendingOtps.set(phone, MOCK_OTP);
+  return { otp: MOCK_OTP };
 }
 
-export function verifyMockOtp(phone: string, otp: string): boolean {
-  return otpStore.get(phone) === otp || otp === MOCK_OTP;
+export function verifyMockOtp(phone: string, otp: string) {
+  return pendingOtps.get(phone) === otp || otp === MOCK_OTP;
 }
 
-export function createSession(phone: string, role: "customer" | "provider" = "customer"): string {
-  const token = `sess_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-  sessions.set(token, { phone, role });
-  return token;
+function generateToken() {
+  return randomBytes(32).toString("hex");
 }
 
-export function getSession(token: string) {
-  return sessions.get(token) ?? null;
+export async function createSession(userId: string) {
+  const token = generateToken();
+  const expiresAt = new Date(Date.now() + SESSION_MAX_AGE_SECONDS * 1000);
+
+  await prisma.session.create({
+    data: { userId, token, expiresAt },
+  });
+
+  return { token, expiresAt };
 }
 
-export function deleteSession(token: string) {
-  sessions.delete(token);
+export async function deleteSession(token: string) {
+  await prisma.session.deleteMany({ where: { token } });
 }
 
-export async function getServerSession() {
+export async function getServerSession(): Promise<SessionUser | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get(SESSION_COOKIE)?.value;
   if (!token) return null;
-  return getSession(token);
+
+  const session = await prisma.session.findUnique({
+    where: { token },
+    include: { user: true },
+  });
+
+  if (!session || session.expiresAt < new Date()) {
+    if (session) await prisma.session.delete({ where: { id: session.id } });
+    return null;
+  }
+
+  return {
+    id: session.user.id,
+    phone: session.user.phone,
+    name: session.user.name,
+  };
 }
 
-export { SESSION_COOKIE };
-
-// Mock online status for providers
-const onlineStatus = new Map<string, boolean>();
-
-export function getProviderOnline(providerId: string): boolean {
-  return onlineStatus.get(providerId) ?? false;
+export async function findOrCreateUser(phone: string) {
+  return prisma.user.upsert({
+    where: { phone },
+    update: {},
+    create: { phone },
+  });
 }
 
-export function toggleProviderOnline(providerId: string): boolean {
-  const next = !getProviderOnline(providerId);
-  onlineStatus.set(providerId, next);
-  return next;
+export function sessionCookieOptions(expiresAt: Date) {
+  return {
+    httpOnly: true,
+    path: "/",
+    sameSite: "lax" as const,
+    secure: process.env.NODE_ENV === "production",
+    expires: expiresAt,
+  };
 }
