@@ -1,0 +1,14 @@
+import { Suspense } from "react";
+import { PropertyListingView } from "@/components/customer/accommodation/PropertyListingView";
+
+export default function AccommodationPage() {
+  return (
+    <div className="page-content">
+      <h1 className="page-title">Find your stay</h1>
+      <p className="page-subtitle">Rooms, PG, hostels, apartments and more in Hyderabad.</p>
+      <Suspense fallback={<p className="text-muted">Loading…</p>}>
+        <PropertyListingView />
+      </Suspense>
+    </div>
+  );
+}

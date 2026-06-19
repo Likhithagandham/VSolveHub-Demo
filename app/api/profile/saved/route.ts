@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/client";
-import { serializeService } from "@/lib/catalog/queries";
+import { serializeService, serviceInclude } from "@/lib/catalog/queries";
 import { savedServiceSchema } from "@/lib/validation/schemas";
 
 export async function GET() {
@@ -12,7 +12,7 @@ export async function GET() {
 
   const saved = await prisma.savedService.findMany({
     where: { userId: session.id },
-    include: { service: { include: { category: true } } },
+    include: { service: { include: serviceInclude } },
     orderBy: { createdAt: "desc" },
   });
 
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
       userId: session.id,
       serviceId: parsed.data.serviceId,
     },
-    include: { service: { include: { category: true } } },
+    include: { service: { include: serviceInclude } },
   });
 
   return NextResponse.json({ saved: serializeService(saved.service) });

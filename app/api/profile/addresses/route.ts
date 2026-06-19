@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/client";
-import { addressSchema } from "@/lib/validation/schemas";
+import { addressSchema, buildFullAddress } from "@/lib/validation/schemas";
 
 export async function GET() {
   const session = await getServerSession();
@@ -29,9 +29,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const { label, fullAddress, isDefault } = parsed.data;
+  const data = parsed.data;
+  const fullAddress = buildFullAddress(data);
 
-  if (isDefault) {
+  if (data.isDefault) {
     await prisma.address.updateMany({
       where: { userId: session.id },
       data: { isDefault: false },
@@ -41,9 +42,16 @@ export async function POST(req: NextRequest) {
   const address = await prisma.address.create({
     data: {
       userId: session.id,
-      label,
+      label: data.label,
       fullAddress,
-      isDefault: isDefault ?? false,
+      houseNumber: data.houseNumber,
+      landmark: data.landmark,
+      area: data.area,
+      city: data.city,
+      pincode: data.pincode,
+      lat: data.lat,
+      lng: data.lng,
+      isDefault: data.isDefault ?? false,
     },
   });
 

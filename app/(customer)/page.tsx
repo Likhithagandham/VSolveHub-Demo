@@ -3,11 +3,11 @@ import { HeroBanner } from "@/components/customer/home/HeroBanner";
 import { QuickServices } from "@/components/customer/home/QuickServices";
 import { PromoCards } from "@/components/customer/home/PromoCards";
 import { WhyChoose } from "@/components/customer/home/WhyChoose";
-import { getPopularServices, getServicesByIds } from "@/lib/catalog/queries";
+import { getPopularServices, getServicesByIds, serializeService, serviceInclude } from "@/lib/catalog/queries";
 import { getRecentlyViewedIds } from "@/lib/recently-viewed";
 import { getServerSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/client";
-import { formatPrice } from "@/lib/format";
+import { formatPriceLabel } from "@/lib/format";
 
 export default async function HomePage() {
   const [popular, recentIds, session] = await Promise.all([
@@ -22,25 +22,11 @@ export default async function HomePage() {
   if (session) {
     const saved = await prisma.savedService.findMany({
       where: { userId: session.id },
-      include: { service: { include: { category: true } } },
+      include: { service: { include: serviceInclude } },
       take: 6,
       orderBy: { createdAt: "desc" },
     });
-    savedServices = saved.map((s) => ({
-      id: s.service.id,
-      name: s.service.name,
-      slug: s.service.slug,
-      description: s.service.description,
-      price: s.service.price,
-      duration: s.service.duration,
-      tags: JSON.parse(s.service.tags),
-      category: {
-        id: s.service.category.id,
-        name: s.service.category.name,
-        slug: s.service.category.slug,
-        icon: s.service.category.icon,
-      },
-    }));
+    savedServices = saved.map((s) => serializeService(s.service));
   }
 
   return (
@@ -66,7 +52,7 @@ export default async function HomePage() {
             >
               <span style={{ fontSize: "1.5rem" }}>{service.category.icon}</span>
               <h3>{service.name}</h3>
-              <p>{formatPrice(service.price)}</p>
+              <p>{formatPriceLabel(service.pricePaise, service.unit)}</p>
             </Link>
           ))}
         </div>
@@ -84,7 +70,7 @@ export default async function HomePage() {
               >
                 <span style={{ fontSize: "1.5rem" }}>{service.category.icon}</span>
                 <h3>{service.name}</h3>
-                <p>{formatPrice(service.price)}</p>
+                <p>{formatPriceLabel(service.pricePaise, service.unit)}</p>
               </Link>
             ))}
           </div>
@@ -103,7 +89,7 @@ export default async function HomePage() {
               >
                 <span style={{ fontSize: "1.5rem" }}>{service.category.icon}</span>
                 <h3>{service.name}</h3>
-                <p>{formatPrice(service.price)}</p>
+                <p>{formatPriceLabel(service.pricePaise, service.unit)}</p>
               </Link>
             ))}
           </div>

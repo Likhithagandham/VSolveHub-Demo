@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getServerSession } from "@/lib/auth/session";
-import { ProfileNav } from "@/components/customer/profile/ProfileNav";
+import { ProfileSubPage } from "@/components/customer/profile/ProfileSubPage";
+import { ProfileBookingsSummary } from "@/components/customer/profile/ProfileStats";
 import { getUserBookings } from "@/lib/bookings/queries";
 import { formatPrice, formatDate } from "@/lib/format";
 import { Badge } from "@/components/ui/Badge";
@@ -11,12 +12,11 @@ export default async function ProfileBookingsPage() {
   if (!session) redirect("/booking/otp?redirect=/profile/bookings");
 
   const bookings = await getUserBookings(session.id);
+  const totalPaise = bookings.reduce((sum, b) => sum + b.quotedAmount, 0);
 
   return (
-    <div className="page-content">
-      <h1 className="page-title">My bookings</h1>
-      <ProfileNav />
-
+    <ProfileSubPage title="My bookings">
+      <ProfileBookingsSummary count={bookings.length} totalPaise={totalPaise} />
       {bookings.length === 0 ? (
         <div className="empty-state">
           <p>No bookings yet.</p>
@@ -40,6 +40,6 @@ export default async function ProfileBookingsPage() {
           ))}
         </div>
       )}
-    </div>
+    </ProfileSubPage>
   );
 }

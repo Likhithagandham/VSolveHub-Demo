@@ -10,8 +10,8 @@ export default async function BookingTrackPage({ params }: PageProps) {
   return (
     <div className="page-content">
       <h1 className="page-title">Track booking</h1>
-      <p className="page-subtitle">Live status updates — provider matching is simulated for this MVP.</p>
-      <BookingTracker ref={ref} />
+      <p className="page-subtitle">Live status updates for your booking.</p>
+      <BookingTracker bookingRef={ref} />
     </div>
   );
 }

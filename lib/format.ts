@@ -1,10 +1,20 @@
-export function formatPrice(rupees: number): string {
+export function formatPrice(paise: number): string {
+  const rupees = paise / 100;
   return `₹${rupees.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 }
 
-/** @deprecated Use formatPrice — kept for compatibility */
+export function formatPriceLabel(paise: number, unit?: string): string {
+  if (unit === "job" || paise === 0) return "Free to browse";
+  const price = formatPrice(paise);
+  if (unit === "day") return `${price}/day`;
+  if (unit === "night") return `${price}/night`;
+  if (unit === "hour") return `${price}/hr`;
+  return price;
+}
+
+/** @deprecated Use formatPrice — price is stored in paise */
 export function formatMoney(paise: number): string {
-  return formatPrice(Math.round(paise / 100));
+  return formatPrice(paise);
 }
 
 export function formatDate(date: Date | string): string {

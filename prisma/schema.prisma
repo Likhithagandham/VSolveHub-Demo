@@ -13,10 +13,12 @@ model User {
   name      String?
   createdAt DateTime @default(now())
 
-  sessions      Session[]
-  addresses     Address[]
-  savedServices SavedService[]
-  bookings      Booking[]
+  sessions              Session[]
+  addresses             Address[]
+  savedServices         SavedService[]
+  bookings              Booking[]
+  accommodationBookings AccommodationBooking[]
+  vehicleBookings       VehicleBooking[]
 }
 
 model Session {
@@ -30,37 +32,145 @@ model Session {
 }
 
 model Address {
-  id          String  @id @default(cuid())
+  id          String   @id @default(cuid())
   userId      String
   label       String
   fullAddress String
-  isDefault   Boolean @default(false)
+  houseNumber String?
+  landmark    String?
+  area        String?
+  city        String?
+  pincode     String?
+  lat         Float?
+  lng         Float?
+  isDefault   Boolean  @default(false)
   createdAt   DateTime @default(now())
 
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   bookings Booking[]
 }
 
-model ServiceCategory {
-  id   String @id @default(cuid())
-  name String
-  slug String @unique
-  icon String
+model Vendor {
+  id               String   @id @default(cuid())
+  name             String
+  phone            String
+  rating           Float    @default(4.5)
+  categorySlug     String
+  lat              Float
+  lng              Float
+  isAvailable      Boolean  @default(true)
+  createdAt        DateTime @default(now())
 
+  bookings        Booking[]
+  vehicleBookings VehicleBooking[]
+}
+
+model VehicleDriver {
+  id              String   @id @default(cuid())
+  name            String
+  phone           String
+  rating          Float    @default(4.5)
+  vehicleCategory String
+  vehicleNumber   String
+  lat             Float
+  lng             Float
+  isAvailable     Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  bookings VehicleBooking[]
+}
+
+model VehicleRentalAsset {
+  id               String   @id @default(cuid())
+  rentalType       String
+  name             String
+  brand            String
+  model            String
+  year             Int
+  pricePerDayPaise Int
+  depositPaise     Int
+  imageUrl         String   @default("")
+  isAvailable      Boolean  @default(true)
+  createdAt        DateTime @default(now())
+
+  bookings VehicleBooking[]
+}
+
+model VehicleBooking {
+  id            String   @id @default(cuid())
+  bookingRef    String   @unique
+  userId        String
+  flowType      String
+  serviceSlug   String
+  status        String   @default("REQUESTED")
+  paymentStatus String   @default("PENDING")
+  paymentMethod String?
+  quotedAmount  Int
+  depositPaise  Int      @default(0)
+  driverId      String?
+  rentalAssetId String?
+  vendorId      String?
+  detailsJson   String   @default("{}")
+  rating        Int?
+  review        String?
+  createdAt     DateTime @default(now())
+
+  user        User                      @relation(fields: [userId], references: [id])
+  driver      VehicleDriver?            @relation(fields: [driverId], references: [id])
+  rentalAsset VehicleRentalAsset?       @relation(fields: [rentalAssetId], references: [id])
+  vendor      Vendor?                   @relation(fields: [vendorId], references: [id])
+  statusLogs  VehicleBookingStatusLog[]
+}
+
+model VehicleBookingStatusLog {
+  id        String   @id @default(cuid())
+  bookingId String
+  status    String
+  createdAt DateTime @default(now())
+
+  booking VehicleBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+}
+
+model ServiceCategory {
+  id        String @id @default(cuid())
+  name      String
+  slug      String @unique
+  tagline   String?
+  icon      String
+  sortOrder Int    @default(0)
+
+  subCategories ServiceSubCategory[]
+  services      Service[]
+}
+
+model ServiceSubCategory {
+  id         String @id @default(cuid())
+  categoryId String
+  name       String
+  slug       String
+  sortOrder  Int    @default(0)
+
+  category ServiceCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   services Service[]
+
+  @@unique([slug, categoryId])
 }
 
 model Service {
-  id          String @id @default(cuid())
-  categoryId  String
-  name        String
-  slug        String
-  description String
-  price       Int
-  duration    Int
-  tags        String @default("[]")
+  id            String @id @default(cuid())
+  categoryId    String
+  subCategoryId String?
+  name          String
+  slug          String
+  description   String
+  pricePaise    Int
+  duration      Int
+  archetype     String @default("A")
+  unit          String @default("visit")
+  tags          String @default("[]")
 
-  category      ServiceCategory @relation(fields: [categoryId], references: [id])
+  category      ServiceCategory     @relation(fields: [categoryId], references: [id])
+  subCategory   ServiceSubCategory? @relation(fields: [subCategoryId], references: [id])
   savedServices SavedService[]
   bookings      Booking[]
 
@@ -80,20 +190,34 @@ model SavedService {
 }
 
 model Booking {
-  id           String   @id @default(cuid())
-  bookingRef   String   @unique
-  userId       String
-  serviceId    String
-  addressId    String
-  slot         String
-  status       String   @default("SEARCHING")
-  quotedAmount Int
-  createdAt    DateTime @default(now())
+  id                   String   @id @default(cuid())
+  bookingRef           String   @unique
+  userId               String
+  serviceId            String
+  addressId            String
+  vendorId             String?
+  slot                 String
+  scheduleType         String   @default("scheduled")
+  status               String   @default("REQUESTED")
+  paymentStatus        String   @default("PENDING")
+  paymentMethod        String?
+  archetype            String   @default("A")
+  archetypeDetails     String   @default("{}")
+  issueDescription     String   @default("")
+  mediaUrls            String   @default("[]")
+  vendorAssignmentMode String   @default("auto")
+  baseChargePaise      Int      @default(0)
+  quotedAmount         Int
+  finalAmountPaise     Int?
+  rating               Int?
+  review               String?
+  createdAt            DateTime @default(now())
 
-  user         User               @relation(fields: [userId], references: [id])
-  service      Service            @relation(fields: [serviceId], references: [id])
-  address      Address            @relation(fields: [addressId], references: [id])
-  statusLogs   BookingStatusLog[]
+  user       User               @relation(fields: [userId], references: [id])
+  service    Service            @relation(fields: [serviceId], references: [id])
+  address    Address            @relation(fields: [addressId], references: [id])
+  vendor     Vendor?            @relation(fields: [vendorId], references: [id])
+  statusLogs BookingStatusLog[]
 }
 
 model BookingStatusLog {
@@ -103,4 +227,84 @@ model BookingStatusLog {
   createdAt DateTime @default(now())
 
   booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+}
+
+model PropertyOwner {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String
+  rating    Float    @default(4.5)
+  createdAt DateTime @default(now())
+
+  properties AccommodationProperty[]
+  bookings   AccommodationBooking[]
+}
+
+model AccommodationProperty {
+  id               String   @id @default(cuid())
+  ownerId          String
+  propertyType     String
+  serviceSlug        String?
+  title            String
+  location         String
+  area             String
+  city             String   @default("Hyderabad")
+  lat              Float
+  lng              Float
+  pricePaise       Int
+  priceUnit        String   @default("month")
+  depositPaise     Int      @default(0)
+  rating           Float    @default(4.5)
+  roomType         String
+  isAvailable      Boolean  @default(true)
+  images           String   @default("[]")
+  amenities        String   @default("[]")
+  rules            String   @default("[]")
+  hasAc            Boolean  @default(true)
+  isFurnished      Boolean  @default(true)
+  sharingType      String   @default("single")
+  foodIncluded     Boolean  @default(false)
+  genderPreference String   @default("any")
+  createdAt        DateTime @default(now())
+
+  owner    PropertyOwner          @relation(fields: [ownerId], references: [id])
+  bookings AccommodationBooking[]
+}
+
+model AccommodationBooking {
+  id                  String   @id @default(cuid())
+  bookingRef          String   @unique
+  userId              String
+  propertyId          String
+  ownerId             String
+  bookingType         String
+  moveInDate          String?
+  visitDate           String?
+  durationMonths      Int?
+  numberOfPeople      Int      @default(1)
+  occupation          String   @default("")
+  specialRequirements String   @default("")
+  idProofUrls         String   @default("[]")
+  tokenAdvancePaise   Int      @default(0)
+  bookingFeePaise     Int      @default(0)
+  firstMonthRentPaise Int      @default(0)
+  totalPaidPaise      Int      @default(0)
+  paymentStatus       String   @default("PENDING")
+  paymentMethod       String?
+  status              String   @default("PENDING")
+  createdAt           DateTime @default(now())
+
+  user       User                            @relation(fields: [userId], references: [id])
+  property   AccommodationProperty           @relation(fields: [propertyId], references: [id])
+  owner      PropertyOwner                   @relation(fields: [ownerId], references: [id])
+  statusLogs AccommodationBookingStatusLog[]
+}
+
+model AccommodationBookingStatusLog {
+  id        String   @id @default(cuid())
+  bookingId String
+  status    String
+  createdAt DateTime @default(now())
+
+  booking AccommodationBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 }

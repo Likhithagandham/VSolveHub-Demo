@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   getAllServices,
+  getCatalogGrouped,
   getCategories,
   getPopularServices,
   getServiceBySlug,
@@ -11,6 +12,12 @@ import {
 export async function GET(req: NextRequest) {
   const category = req.nextUrl.searchParams.get("category");
   const slug = req.nextUrl.searchParams.get("slug");
+  const grouped = req.nextUrl.searchParams.get("grouped");
+
+  if (grouped === "true") {
+    const catalog = await getCatalogGrouped();
+    return NextResponse.json({ catalog });
+  }
 
   if (category && slug) {
     const service = await getServiceBySlug(category, slug);

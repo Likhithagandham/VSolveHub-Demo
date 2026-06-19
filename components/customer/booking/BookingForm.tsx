@@ -17,7 +17,8 @@ type Address = {
 type Service = {
   id: string;
   name: string;
-  price: number;
+  pricePaise: number;
+  unit?: string;
   category: { icon: string };
 };
 
@@ -135,7 +136,7 @@ export function BookingForm({ serviceId }: BookingFormProps) {
           <span className="service-card-icon">{service.category.icon}</span>
           <div>
             <h2 className="card-title">{service.name}</h2>
-            <p className="card-price">{formatPrice(service.price)}</p>
+            <p className="card-price">{formatPrice(service.pricePaise)}{service.unit === "day" ? "/day" : ""}</p>
           </div>
         </div>
       </div>

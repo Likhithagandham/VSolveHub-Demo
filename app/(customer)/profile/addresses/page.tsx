@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "@/lib/auth/session";
-import { ProfileNav } from "@/components/customer/profile/ProfileNav";
+import { ProfileSubPage } from "@/components/customer/profile/ProfileSubPage";
+import { ProfileAddressesSummary } from "@/components/customer/profile/ProfileStats";
 import { prisma } from "@/lib/db/client";
 import { AddressManager } from "@/components/customer/profile/AddressManager";
 
@@ -14,10 +15,9 @@ export default async function ProfileAddressesPage() {
   });
 
   return (
-    <div className="page-content">
-      <h1 className="page-title">Saved addresses</h1>
-      <ProfileNav />
+    <ProfileSubPage title="Manage addresses">
+      <ProfileAddressesSummary count={addresses.length} />
       <AddressManager initialAddresses={addresses} />
-    </div>
+    </ProfileSubPage>
   );
 }

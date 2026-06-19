@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "@/lib/auth/session";
-import { BookingForm } from "@/components/customer/booking/BookingForm";
+import { BookingFlow } from "@/components/customer/booking/BookingFlow";
 
 type PageProps = {
   searchParams: Promise<{ serviceId?: string }>;
@@ -18,8 +18,8 @@ export default async function BookingPage({ searchParams }: PageProps) {
   return (
     <div className="page-content">
       <h1 className="page-title">Book your service</h1>
-      <p className="page-subtitle">Choose a time slot and confirm your address.</p>
-      <BookingForm serviceId={serviceId} />
+      <p className="page-subtitle">Complete the steps below to confirm your booking.</p>
+      <BookingFlow serviceId={serviceId} />
     </div>
   );
 }

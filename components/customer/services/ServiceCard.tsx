@@ -1,18 +1,48 @@
 import Link from "next/link";
-import { formatPrice } from "@/lib/format";
-import { Button } from "@/components/ui/Button";
+import { formatPriceLabel } from "@/lib/format";
+import { SERVICE_SLUG_TO_PROPERTY_TYPE } from "@/lib/accommodation/constants";
+import { getVehicleFlowHref } from "@/lib/vehicle/constants";
 
 export type ServiceCardData = {
   id: string;
   name: string;
   slug: string;
   description: string;
-  price: number;
+  pricePaise: number;
+  unit?: string;
   category: { slug: string; name: string; icon: string };
+  subCategory?: { name: string; slug: string } | null;
 };
 
+function getAccommodationHref(service: ServiceCardData) {
+  const subSlug = service.subCategory?.slug ?? service.slug;
+  const type = SERVICE_SLUG_TO_PROPERTY_TYPE[subSlug] ?? SERVICE_SLUG_TO_PROPERTY_TYPE[service.slug];
+  return type ? `/accommodation?type=${type}` : "/accommodation";
+}
+
+function getBookHref(service: ServiceCardData) {
+  if (service.category.slug === "accommodation-services") {
+    return getAccommodationHref(service);
+  }
+  const subSlug = service.subCategory?.slug ?? service.slug;
+  const vehicleHref = getVehicleFlowHref(service.slug, subSlug);
+  if (vehicleHref) return vehicleHref;
+  return `/booking?serviceId=${service.id}`;
+}
+
+function getBookLabel(service: ServiceCardData) {
+  if (service.category.slug === "accommodation-services") return "Browse stays";
+  const subSlug = service.subCategory?.slug ?? service.slug;
+  if (getVehicleFlowHref(service.slug, subSlug)) return "Start booking";
+  return "Book Now";
+}
+
 export function ServiceCard({ service }: { service: ServiceCardData }) {
+  const isAccommodation = service.category.slug === "accommodation-services";
   const href = `/services/${service.category.slug}/${service.slug}`;
+  const bookHref = getBookHref(service);
+  const bookLabel = getBookLabel(service);
+
   return (
     <article className="card service-card">
       <div className="service-card-header">
@@ -23,16 +53,19 @@ export function ServiceCard({ service }: { service: ServiceCardData }) {
           <h3 className="card-title">
             <Link href={href}>{service.name}</Link>
           </h3>
-          <p className="card-text">{service.description.slice(0, 80)}…</p>
-          <p className="card-price">{formatPrice(service.price)}</p>
+          <p className="card-text">
+            {service.subCategory ? `${service.subCategory.name} · ` : ""}
+            {service.description.slice(0, 60)}…
+          </p>
+          <p className="card-price">{formatPriceLabel(service.pricePaise, service.unit)}</p>
         </div>
       </div>
       <div className="service-card-actions">
         <Link href={href} className="btn btn-secondary btn-sm">
           Details
         </Link>
-        <Link href={`/booking?serviceId=${service.id}`} className="btn btn-primary btn-sm">
-          Book Now
+        <Link href={bookHref} className="btn btn-primary btn-sm">
+          {bookLabel}
         </Link>
       </div>
     </article>

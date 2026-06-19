@@ -1,7 +1,10 @@
-import type { Service, ServiceCategory } from "@prisma/client";
+import type { Service, ServiceCategory, ServiceSubCategory } from "@prisma/client";
 import { prisma } from "@/lib/db/client";
 
-export type ServiceWithCategory = Service & { category: ServiceCategory };
+export type ServiceWithRelations = Service & {
+  category: ServiceCategory;
+  subCategory: ServiceSubCategory | null;
+};
 
 export function parseTags(tags: string): string[] {
   try {
@@ -12,41 +15,101 @@ export function parseTags(tags: string): string[] {
   }
 }
 
-export function serializeService(service: ServiceWithCategory) {
+export function serializeService(service: ServiceWithRelations) {
   return {
     id: service.id,
     name: service.name,
     slug: service.slug,
     description: service.description,
-    price: service.price,
+    pricePaise: service.pricePaise,
     duration: service.duration,
+    archetype: service.archetype,
+    unit: service.unit,
     tags: parseTags(service.tags),
     category: {
       id: service.category.id,
       name: service.category.name,
       slug: service.category.slug,
       icon: service.category.icon,
+      tagline: service.category.tagline,
     },
+    subCategory: service.subCategory
+      ? {
+          id: service.subCategory.id,
+          name: service.subCategory.name,
+          slug: service.subCategory.slug,
+        }
+      : null,
   };
 }
 
+const serviceInclude = {
+  category: true,
+  subCategory: true,
+} as const;
+
+export { serviceInclude };
+
 export async function getCategories() {
-  return prisma.serviceCategory.findMany({ orderBy: { name: "asc" } });
+  return prisma.serviceCategory.findMany({
+    orderBy: { sortOrder: "asc" },
+    include: {
+      subCategories: { orderBy: { sortOrder: "asc" } },
+      _count: { select: { services: true } },
+    },
+  });
+}
+
+export async function getCatalogGrouped() {
+  const categories = await prisma.serviceCategory.findMany({
+    orderBy: { sortOrder: "asc" },
+    include: {
+      subCategories: {
+        orderBy: { sortOrder: "asc" },
+        include: {
+          services: {
+            include: serviceInclude,
+            orderBy: { name: "asc" },
+          },
+        },
+      },
+      services: {
+        where: { subCategoryId: null },
+        include: serviceInclude,
+        orderBy: { name: "asc" },
+      },
+    },
+  });
+
+  return categories.map((cat) => ({
+    id: cat.id,
+    name: cat.name,
+    slug: cat.slug,
+    tagline: cat.tagline,
+    icon: cat.icon,
+    subCategories: cat.subCategories.map((sub) => ({
+      id: sub.id,
+      name: sub.name,
+      slug: sub.slug,
+      services: sub.services.map(serializeService),
+    })),
+    services: cat.services.map(serializeService),
+  }));
 }
 
 export async function getAllServices() {
   const services = await prisma.service.findMany({
-    include: { category: true },
+    include: serviceInclude,
     orderBy: { name: "asc" },
   });
   return services.map(serializeService);
 }
 
-export async function getPopularServices(limit = 6) {
+export async function getPopularServices(limit = 8) {
   const services = await prisma.service.findMany({
-    include: { category: true },
+    include: serviceInclude,
     take: limit,
-    orderBy: { price: "asc" },
+    orderBy: { name: "asc" },
   });
   return services.map(serializeService);
 }
@@ -57,7 +120,7 @@ export async function getServiceBySlug(categorySlug: string, serviceSlug: string
       slug: serviceSlug,
       category: { slug: categorySlug },
     },
-    include: { category: true },
+    include: serviceInclude,
   });
   return service ? serializeService(service) : null;
 }
@@ -65,7 +128,7 @@ export async function getServiceBySlug(categorySlug: string, serviceSlug: string
 export async function getServicesByCategory(categorySlug: string) {
   const services = await prisma.service.findMany({
     where: { category: { slug: categorySlug } },
-    include: { category: true },
+    include: serviceInclude,
     orderBy: { name: "asc" },
   });
   return services.map(serializeService);
@@ -76,7 +139,7 @@ export async function searchServices(query: string) {
   if (!q) return getAllServices();
 
   const services = await prisma.service.findMany({
-    include: { category: true },
+    include: serviceInclude,
   });
 
   return services
@@ -87,6 +150,8 @@ export async function searchServices(query: string) {
         service.description,
         service.category.name,
         service.category.slug,
+        service.subCategory?.name ?? "",
+        service.subCategory?.slug ?? "",
         ...tags,
       ]
         .join(" ")
@@ -100,7 +165,7 @@ export async function getServicesByIds(ids: string[]) {
   if (!ids.length) return [];
   const services = await prisma.service.findMany({
     where: { id: { in: ids } },
-    include: { category: true },
+    include: serviceInclude,
   });
   const order = new Map(ids.map((id, i) => [id, i]));
   return services

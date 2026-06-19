@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "@/lib/auth/session";
 import { createBooking, getUserBookings } from "@/lib/bookings/queries";
+import { getVendorById } from "@/lib/bookings/vendors";
 import { bookingSchema } from "@/lib/validation/schemas";
+import { WALLET_BALANCE_PAISE } from "@/lib/profile/section-data";
 import { prisma } from "@/lib/db/client";
 
 export async function POST(req: NextRequest) {
@@ -16,11 +18,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const { serviceId, addressId, slot } = parsed.data;
+  const {
+    serviceId,
+    addressId,
+    slot,
+    vendorId,
+    issueDescription,
+    mediaUrls,
+    scheduleType,
+    paymentMethod,
+    vendorAssignmentMode,
+  } = parsed.data;
 
-  const [service, address] = await Promise.all([
-    prisma.service.findUnique({ where: { id: serviceId } }),
+  const [service, address, vendor] = await Promise.all([
+    prisma.service.findUnique({ where: { id: serviceId }, include: { category: true } }),
     prisma.address.findFirst({ where: { id: addressId, userId: session.id } }),
+    getVendorById(vendorId),
   ]);
 
   if (!service) {
@@ -29,21 +42,47 @@ export async function POST(req: NextRequest) {
   if (!address) {
     return NextResponse.json({ error: "Address not found" }, { status: 404 });
   }
+  if (!vendor) {
+    return NextResponse.json({ error: "Professional not found" }, { status: 404 });
+  }
+
+  const baseChargePaise = service.pricePaise;
+  const quotedAmount = baseChargePaise;
+
+  if (paymentMethod === "wallet" && quotedAmount > WALLET_BALANCE_PAISE) {
+    return NextResponse.json({ error: "Insufficient wallet balance" }, { status: 400 });
+  }
+
+  const paymentStatus = paymentMethod === "cod" ? "COD" : "PAID";
 
   const booking = await createBooking({
     userId: session.id,
     serviceId,
     addressId,
     slot,
-    quotedAmount: service.price,
+    quotedAmount,
+    baseChargePaise,
+    archetype: service.archetype,
+    vendorId,
+    issueDescription,
+    mediaUrls,
+    paymentStatus,
+    paymentMethod,
+    scheduleType,
+    vendorAssignmentMode,
   });
 
   return NextResponse.json({
     bookingRef: booking.bookingRef,
     status: booking.status,
+    paymentStatus: booking.paymentStatus,
     service: booking.service.name,
     slot: booking.slot,
     address: booking.address.fullAddress,
+    vendor: booking.vendor
+      ? { name: booking.vendor.name, rating: booking.vendor.rating }
+      : null,
+    baseChargePaise: booking.baseChargePaise,
     quotedAmount: booking.quotedAmount,
   });
 }

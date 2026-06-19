@@ -4,6 +4,7 @@ import {
   BOOKING_STATUSES,
   type BookingStatus,
   STATUS_MESSAGES,
+  normalizeBookingStatus,
 } from "@/lib/constants";
 
 const STATUS_INTERVAL_MS = 15_000;
@@ -14,8 +15,19 @@ export async function createBooking(input: {
   addressId: string;
   slot: string;
   quotedAmount: number;
+  baseChargePaise: number;
+  archetype?: string;
+  archetypeDetails?: Record<string, unknown>;
+  vendorId?: string;
+  issueDescription?: string;
+  mediaUrls?: string[];
+  paymentStatus: string;
+  paymentMethod: string;
+  scheduleType: string;
+  vendorAssignmentMode?: string;
 }) {
   const bookingRef = generateBookingRef();
+  const initialStatus = input.vendorId ? "ACCEPTED" : "REQUESTED";
 
   const booking = await prisma.booking.create({
     data: {
@@ -23,16 +35,28 @@ export async function createBooking(input: {
       userId: input.userId,
       serviceId: input.serviceId,
       addressId: input.addressId,
+      vendorId: input.vendorId,
       slot: input.slot,
       quotedAmount: input.quotedAmount,
-      status: "SEARCHING",
+      baseChargePaise: input.baseChargePaise,
+      finalAmountPaise: input.quotedAmount,
+      archetype: input.archetype ?? "A",
+      archetypeDetails: JSON.stringify(input.archetypeDetails ?? {}),
+      issueDescription: input.issueDescription ?? "",
+      mediaUrls: JSON.stringify(input.mediaUrls ?? []),
+      paymentStatus: input.paymentStatus,
+      paymentMethod: input.paymentMethod,
+      scheduleType: input.scheduleType,
+      vendorAssignmentMode: input.vendorAssignmentMode ?? "auto",
+      status: initialStatus,
       statusLogs: {
-        create: { status: "SEARCHING" },
+        create: { status: initialStatus },
       },
     },
     include: {
-      service: { include: { category: true } },
+      service: { include: { category: true, subCategory: true } },
       address: true,
+      vendor: true,
     },
   });
 
@@ -46,8 +70,9 @@ export async function getBookingByRef(ref: string, userId?: string) {
       ...(userId ? { userId } : {}),
     },
     include: {
-      service: { include: { category: true } },
+      service: { include: { category: true, subCategory: true } },
       address: true,
+      vendor: true,
       statusLogs: { orderBy: { createdAt: "asc" } },
     },
   });
@@ -57,8 +82,9 @@ export async function getUserBookings(userId: string) {
   return prisma.booking.findMany({
     where: { userId },
     include: {
-      service: { include: { category: true } },
+      service: { include: { category: true, subCategory: true } },
       address: true,
+      vendor: true,
     },
     orderBy: { createdAt: "desc" },
   });
@@ -68,27 +94,44 @@ export function getSimulatedStatus(
   createdAt: Date,
   currentStatus: string
 ): BookingStatus {
-  if (currentStatus === "COMPLETED" || currentStatus === "CANCELLED") {
-    return currentStatus as BookingStatus;
+  const normalized = normalizeBookingStatus(currentStatus);
+  if (normalized === "COMPLETED" || normalized === "CANCELLED") {
+    return normalized;
   }
 
+  const activeStatuses = BOOKING_STATUSES.filter((s) => s !== "CANCELLED");
+  const startIndex = Math.max(activeStatuses.indexOf(normalized), 0);
   const elapsed = Date.now() - createdAt.getTime();
-  const step = Math.min(
-    Math.floor(elapsed / STATUS_INTERVAL_MS),
-    BOOKING_STATUSES.length - 1
-  );
-  return BOOKING_STATUSES[step];
+  const steps = Math.floor(elapsed / STATUS_INTERVAL_MS);
+  const targetIndex = Math.min(startIndex + steps, activeStatuses.length - 1);
+  return activeStatuses[targetIndex];
 }
 
-export async function syncBookingStatus(bookingId: string, createdAt: Date, currentStatus: string) {
-  const simulated = getSimulatedStatus(createdAt, currentStatus);
-  if (simulated === currentStatus) {
+export async function syncBookingStatus(
+  bookingId: string,
+  createdAt: Date,
+  currentStatus: string
+) {
+  const normalized = normalizeBookingStatus(currentStatus);
+  const simulated = getSimulatedStatus(createdAt, normalized);
+  if (simulated === normalized) {
     return simulated;
   }
 
-  const booking = await prisma.booking.update({
+  const updateData: { status: string; finalAmountPaise?: number } = {
+    status: simulated,
+  };
+
+  if (simulated === "COMPLETED") {
+    const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
+    if (booking && booking.finalAmountPaise == null) {
+      updateData.finalAmountPaise = booking.quotedAmount;
+    }
+  }
+
+  await prisma.booking.update({
     where: { id: bookingId },
-    data: { status: simulated },
+    data: updateData,
   });
 
   const lastLog = await prisma.bookingStatusLog.findFirst({
@@ -102,9 +145,66 @@ export async function syncBookingStatus(bookingId: string, createdAt: Date, curr
     });
   }
 
-  return booking.status as BookingStatus;
+  return simulated;
+}
+
+export async function cancelBooking(bookingRef: string, userId: string) {
+  const booking = await prisma.booking.findFirst({
+    where: { bookingRef, userId },
+  });
+
+  if (!booking) return null;
+
+  const status = normalizeBookingStatus(booking.status);
+  if (status === "COMPLETED" || status === "CANCELLED") {
+    return { error: "Booking cannot be cancelled" as const };
+  }
+
+  await prisma.booking.update({
+    where: { id: booking.id },
+    data: { status: "CANCELLED" },
+  });
+
+  await prisma.bookingStatusLog.create({
+    data: { bookingId: booking.id, status: "CANCELLED" },
+  });
+
+  return { success: true as const };
+}
+
+export async function submitBookingReview(
+  bookingRef: string,
+  userId: string,
+  rating: number,
+  review: string
+) {
+  const booking = await prisma.booking.findFirst({
+    where: { bookingRef, userId },
+  });
+
+  if (!booking) return null;
+  if (normalizeBookingStatus(booking.status) !== "COMPLETED") {
+    return { error: "Booking not completed" as const };
+  }
+
+  await prisma.booking.update({
+    where: { id: booking.id },
+    data: { rating, review },
+  });
+
+  return { success: true as const };
 }
 
 export function getStatusMessage(status: string) {
-  return STATUS_MESSAGES[status as BookingStatus] ?? "Tracking your booking.";
+  const normalized = normalizeBookingStatus(status);
+  return STATUS_MESSAGES[normalized] ?? "Tracking your booking.";
+}
+
+export function parseMediaUrls(raw: string) {
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as string[]) : [];
+  } catch {
+    return [];
+  }
 }
