@@ -6,7 +6,6 @@ const DEFAULT_SETTINGS = {
   pushNotifications: true,
   smsAlerts: true,
   emailUpdates: false,
-  whatsappUpdates: true,
 };
 
 export function ProfileSettingsForm() {
@@ -39,14 +38,6 @@ export function ProfileSettingsForm() {
               type="checkbox"
               checked={settings.emailUpdates}
               onChange={() => toggle("emailUpdates")}
-            />
-          </label>
-          <label className="profile-toggle-row">
-            <span>WhatsApp updates</span>
-            <input
-              type="checkbox"
-              checked={settings.whatsappUpdates}
-              onChange={() => toggle("whatsappUpdates")}
             />
           </label>
         </div>

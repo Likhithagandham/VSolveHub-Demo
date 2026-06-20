@@ -7,6 +7,8 @@ import { ServiceDetailFaq } from "./ServiceDetailFaq";
 import { ServiceDetailReviews } from "./ServiceDetailReviews";
 import { ServiceShareButton } from "./ServiceShareButton";
 import { SaveServiceButton } from "./SaveServiceButton";
+import { CategoryIcon } from "@/components/ui/CategoryIcon";
+import { FlaticonIcon } from "@/components/ui/FlaticonIcon";
 
 type Service = {
   id: string;
@@ -57,7 +59,7 @@ export function ServiceDetailView({ service, detail, shareUrl, isSaved, showSave
     <div className="service-detail">
       <div className="sd-topbar">
         <Link href="/services" className="sd-close-btn" aria-label="Close">
-          ✕
+          <FlaticonIcon name="cross" size={18} />
         </Link>
       </div>
 
@@ -65,7 +67,8 @@ export function ServiceDetailView({ service, detail, shareUrl, isSaved, showSave
         <div className="sd-hero-row">
           <div>
             <p className="sd-category">
-              {service.category.icon} {service.category.name}
+              <CategoryIcon slug={service.category.slug} icon={service.category.icon} size={16} />{" "}
+              {service.category.name}
             </p>
             <h1 className="sd-title">{service.name}</h1>
             <div className="sd-rating-row">
@@ -136,13 +139,15 @@ export function ServiceDetailView({ service, detail, shareUrl, isSaved, showSave
           <ul className="sd-trust-list">
             {detail.trustSignals.map((signal) => (
               <li key={signal.text}>
-                <span aria-hidden>{signal.icon}</span>
+                <span aria-hidden>
+                  <FlaticonIcon name={signal.icon} size={18} color="var(--color-brand)" />
+                </span>
                 {signal.text}
               </li>
             ))}
           </ul>
           <div className="sd-pro-photo" aria-hidden>
-            <span>👨‍🔧</span>
+            <FlaticonIcon name="hard-hat" size={40} color="var(--color-brand)" />
           </div>
         </div>
       </section>
@@ -152,7 +157,9 @@ export function ServiceDetailView({ service, detail, shareUrl, isSaved, showSave
         <div className="sd-equipment-grid">
           {detail.equipment.map((item) => (
             <div key={item.name} className="sd-equipment-card">
-              <span className="sd-equipment-icon">{item.icon}</span>
+              <span className="sd-equipment-icon">
+                <FlaticonIcon name={item.icon} size={24} color="var(--color-brand)" />
+              </span>
               <span className="sd-equipment-name">{item.name}</span>
             </div>
           ))}
@@ -164,7 +171,9 @@ export function ServiceDetailView({ service, detail, shareUrl, isSaved, showSave
         <div className="sd-requirements-row">
           {detail.requirements.map((item) => (
             <div key={item.name} className="sd-requirement-card">
-              <span className="sd-req-icon">{item.icon}</span>
+              <span className="sd-req-icon">
+                <FlaticonIcon name={item.icon} size={22} color="var(--color-brand)" />
+              </span>
               <span>{item.name}</span>
             </div>
           ))}
@@ -176,7 +185,9 @@ export function ServiceDetailView({ service, detail, shareUrl, isSaved, showSave
           <h2 className="sd-section-title">Damage protection</h2>
           <p className="sd-protection-text">{detail.damageProtection}</p>
         </div>
-        <span className="sd-shield" aria-hidden>🛡️</span>
+        <span className="sd-shield" aria-hidden>
+          <FlaticonIcon name="shield-check" size={32} color="var(--color-brand)" />
+        </span>
       </section>
 
       <section className="sd-section">

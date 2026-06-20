@@ -122,6 +122,18 @@ export async function getVehicleBookingByRef(ref: string, userId?: string) {
   });
 }
 
+export async function getUserVehicleBookings(userId: string) {
+  return prisma.vehicleBooking.findMany({
+    where: { userId },
+    include: {
+      driver: true,
+      rentalAsset: true,
+      vendor: true,
+    },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
 export function getSimulatedVehicleStatus(
   createdAt: Date,
   currentStatus: string,

@@ -15,7 +15,7 @@ export function SearchBar({ sticky = false }: { sticky?: boolean }) {
     router.push(q ? `/services?q=${encodeURIComponent(q)}` : "/services");
   }
 
-  const wrapperClass = sticky ? "search-sticky" : "";
+  const wrapperClass = sticky ? "search-bar-wrap search-sticky" : "search-bar-wrap";
 
   return (
     <div className={wrapperClass}>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "@/lib/auth/session";
-import { createBooking, getUserBookings } from "@/lib/bookings/queries";
+import { createBooking } from "@/lib/bookings/queries";
+import { getAllUserBookings } from "@/lib/bookings/user-bookings";
 import { getVendorById } from "@/lib/bookings/vendors";
 import { bookingSchema } from "@/lib/validation/schemas";
 import { WALLET_BALANCE_PAISE } from "@/lib/profile/section-data";
@@ -93,6 +94,6 @@ export async function GET() {
     return NextResponse.json({ error: "Authentication required" }, { status: 401 });
   }
 
-  const bookings = await getUserBookings(session.id);
+  const bookings = await getAllUserBookings(session.id);
   return NextResponse.json({ bookings });
 }

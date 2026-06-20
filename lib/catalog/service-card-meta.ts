@@ -104,6 +104,10 @@ function fallbackSubtitle(name: string): string {
   return name.split(" ").slice(0, 3).join(" ");
 }
 
+export function getCategoryTileMeta(slug: string): { icon: IconName; color: string } {
+  return CATEGORY_DEFAULTS[slug] ?? { icon: "grid-menu", color: "#7c3aed" };
+}
+
 export function getServiceCardMeta(
   slug: string,
   categorySlug: string,

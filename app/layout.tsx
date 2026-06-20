@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import "@flaticon/flaticon-uicons/css/regular/rounded.css";
 import "./globals.css";
-import { AppHeader, BottomNav } from "@/components/shared/AppShell";
+import { ShellSwitcher } from "@/components/shared/ShellSwitcher";
 
 export const metadata: Metadata = {
   title: "V Solve Hub — One App, All Solutions",
@@ -11,9 +12,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="app-shell">
-        <AppHeader />
-        <main className="main-content">{children}</main>
-        <BottomNav />
+        <ShellSwitcher>{children}</ShellSwitcher>
       </body>
     </html>
   );

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Textarea } from "@/components/ui/Textarea";
 import type { BookingServiceInfo } from "@/lib/bookings/types";
 import { formatPrice } from "@/lib/format";
+import { CategoryIcon } from "@/components/ui/CategoryIcon";
 
 type Props = {
   service: BookingServiceInfo;
@@ -50,7 +51,14 @@ export function BookingDetailsStep({
     <div className="stack-lg">
       <div className="card">
         <div className="service-card-header">
-          <span className="service-card-icon">{service.category.icon}</span>
+          <span className="service-card-icon">
+            <CategoryIcon
+              slug={service.category.slug}
+              icon={service.category.icon}
+              size={28}
+              color="var(--color-brand)"
+            />
+          </span>
           <div>
             <h2 className="card-title">{service.name}</h2>
             <p className="card-price">

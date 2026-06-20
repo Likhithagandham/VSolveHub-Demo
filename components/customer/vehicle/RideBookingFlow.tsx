@@ -9,6 +9,7 @@ import { WALLET_BALANCE_PAISE } from "@/lib/profile/section-data";
 import { RIDE_TYPES } from "@/lib/vehicle/constants";
 import { estimateDistanceKm, estimateRideFare } from "@/lib/vehicle/pricing";
 import { VehicleFlowHeader } from "./VehicleFlowHeader";
+import { FlaticonIcon } from "@/components/ui/FlaticonIcon";
 
 const STEPS = ["pickup", "drop", "type", "fare", "driver", "payment"] as const;
 const STEP_LABELS: Record<string, string> = {
@@ -110,7 +111,7 @@ export function RideBookingFlow() {
           <div className="grid-2">
             {RIDE_TYPES.map((t) => (
               <button key={t.id} type="button" className={`vendor-card ${rideType === t.id ? "selected" : ""}`} onClick={() => setRideType(t.id)}>
-                <span className="text-2xl">{t.icon}</span>
+                <FlaticonIcon name={t.icon} size={28} color="var(--color-brand)" />
                 <p className="card-title">{t.label}</p>
                 <p className="text-sm text-muted">from {formatPrice(t.basePaise)}</p>
               </button>

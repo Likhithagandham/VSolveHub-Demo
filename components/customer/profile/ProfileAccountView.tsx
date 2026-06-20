@@ -14,6 +14,7 @@ import {
   StarIcon,
   WalletMenuIcon,
 } from "./ProfileIcons";
+import { FlaticonIcon } from "@/components/ui/FlaticonIcon";
 
 type QuickAction = { label: string; href: string };
 type MenuItem = { label: string; href: string };
@@ -52,9 +53,9 @@ export function ProfileAccountView({ name, phone, email, quickActions, menuItems
           <p className="profile-account-meta">{phone}</p>
           <p className="profile-account-meta">{email ?? "Add your email"}</p>
         </div>
-        <button type="button" className="profile-edit-btn" aria-label="Edit profile">
+        <Link href="/profile/edit" className="profile-edit-btn" aria-label="Edit profile">
           <EditIcon />
-        </button>
+        </Link>
       </header>
 
       <div className="profile-quick-actions">
@@ -110,18 +111,9 @@ export function LogoutButton() {
 }
 
 function EditIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-      <path d="M12 20h9" />
-      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
-    </svg>
-  );
+  return <FlaticonIcon name="pen-clip" size={20} />;
 }
 
 function ChevronIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-      <path d="m9 18 6-6-6-6" />
-    </svg>
-  );
+  return <FlaticonIcon name="angle-right" size={18} />;
 }

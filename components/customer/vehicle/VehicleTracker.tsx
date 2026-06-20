@@ -60,7 +60,6 @@ export function VehicleTracker({ bookingRef }: { bookingRef: string }) {
 
   const canCancel = !["COMPLETED", "CANCELLED"].includes(data.status);
   const assignee = data.driver ?? data.vendor;
-  const whatsapp = assignee?.phone.replace(/\D/g, "").replace(/^0/, "91");
 
   return (
     <div className="stack-lg">
@@ -107,16 +106,11 @@ export function VehicleTracker({ bookingRef }: { bookingRef: string }) {
             ★ {assignee.rating.toFixed(1)}
             {data.driver ? ` · ${data.driver.vehicleNumber}` : ""}
           </p>
-          {whatsapp && (
-            <a
-              href={`https://wa.me/${whatsapp}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-secondary btn-sm mt-2"
-            >
-              Contact on WhatsApp
+          {assignee.phone ? (
+            <a href={`tel:${assignee.phone}`} className="btn btn-secondary btn-sm mt-2">
+              Call
             </a>
-          )}
+          ) : null}
         </div>
       )}
 

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ServiceIcon } from "@/components/ui/ServiceIcons";
+import { FlaticonIcon } from "@/components/ui/FlaticonIcon";
 import type { IconName } from "@/components/ui/ServiceIcons";
 
 export type CatalogServiceItem = {
@@ -42,7 +43,7 @@ export function ServiceCatalogView({ categories }: Props) {
           className="view-categories-btn"
           onClick={() => setView((v) => (v === "categories" ? "grid" : "categories"))}
         >
-          <GridIcon />
+          <FlaticonIcon name="grid" size={14} />
           {view === "categories" ? "View as Grid" : "View as Categories"}
         </button>
       </div>
@@ -91,16 +92,5 @@ export function ServiceCatalogView({ categories }: Props) {
         </div>
       )}
     </div>
-  );
-}
-
-function GridIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <rect x="3" y="3" width="7" height="7" rx="1" />
-      <rect x="14" y="3" width="7" height="7" rx="1" />
-      <rect x="3" y="14" width="7" height="7" rx="1" />
-      <rect x="14" y="14" width="7" height="7" rx="1" />
-    </svg>
   );
 }

@@ -11,7 +11,7 @@ import {
   SettingsSection,
   WalletSection,
 } from "@/components/customer/profile/sections/ProfileSectionContent";
-import { prisma } from "@/lib/db/client";
+import { getUserBookingCount } from "@/lib/bookings/user-bookings";
 
 const SECTION_TITLES: Record<string, string> = {
   help: "Help & support",
@@ -37,9 +37,7 @@ export default async function ProfileSectionPage({ params }: Props) {
   if (!title) redirect("/profile");
 
   const bookingCount =
-    section === "rating"
-      ? await prisma.booking.count({ where: { userId: session.id } })
-      : 0;
+    section === "rating" ? await getUserBookingCount(session.id) : 0;
 
   const content = (() => {
     switch (section) {

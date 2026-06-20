@@ -2,6 +2,7 @@ import Link from "next/link";
 import { formatPriceLabel } from "@/lib/format";
 import { SERVICE_SLUG_TO_PROPERTY_TYPE } from "@/lib/accommodation/constants";
 import { getVehicleFlowHref } from "@/lib/vehicle/constants";
+import { CategoryIcon } from "@/components/ui/CategoryIcon";
 
 export type ServiceCardData = {
   id: string;
@@ -47,7 +48,12 @@ export function ServiceCard({ service }: { service: ServiceCardData }) {
     <article className="card service-card">
       <div className="service-card-header">
         <span className="service-card-icon" aria-hidden>
-          {service.category.icon}
+          <CategoryIcon
+            slug={service.category.slug}
+            icon={service.category.icon}
+            size={28}
+            color="var(--color-brand)"
+          />
         </span>
         <div className="service-card-body">
           <h3 className="card-title">

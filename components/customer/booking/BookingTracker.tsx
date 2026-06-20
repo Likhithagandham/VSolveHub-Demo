@@ -81,7 +81,6 @@ export function BookingTracker({ bookingRef }: { bookingRef: string }) {
 
   const status = normalizeBookingStatus(data.status);
   const canCancel = !["COMPLETED", "CANCELLED", "STARTED"].includes(status);
-  const whatsapp = data.vendor?.phone.replace(/\D/g, "").replace(/^0/, "91");
 
   return (
     <div className="stack-lg">
@@ -109,14 +108,6 @@ export function BookingTracker({ bookingRef }: { bookingRef: string }) {
           <div className="booking-action-row">
             <a href={`tel:${data.vendor.phone}`} className="btn btn-secondary btn-sm">
               Call
-            </a>
-            <a
-              href={`https://wa.me/${whatsapp}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-secondary btn-sm"
-            >
-              Chat
             </a>
           </div>
         </div>

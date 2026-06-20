@@ -88,7 +88,6 @@ export const HELP_FAQ = [
 export const HELP_CONTACT = [
   { label: "Call support", value: "1800-123-4567", href: "tel:18001234567" },
   { label: "Email", value: "support@vsolvehub.com", href: "mailto:support@vsolvehub.com" },
-  { label: "WhatsApp", value: "+91 98765 43210", href: "https://wa.me/919876543210" },
 ];
 
 export const ABOUT_INFO = {

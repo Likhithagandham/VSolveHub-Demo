@@ -1,4 +1,7 @@
 import Link from "next/link";
+import type { CSSProperties } from "react";
+import { getCategoryTileMeta } from "@/lib/catalog/service-card-meta";
+import { CategoryIcon } from "@/components/ui/CategoryIcon";
 
 type Category = {
   slug: string;
@@ -8,15 +11,24 @@ type Category = {
 
 export function CategoryGrid({ categories }: { categories: Category[] }) {
   return (
-    <div className="grid-4">
-      {categories.map((cat) => (
-        <Link key={cat.slug} href={`/services?category=${cat.slug}`} className="category-tile">
-          <span className="category-icon" aria-hidden>
-            {cat.icon}
-          </span>
-          <span className="category-name">{cat.name}</span>
-        </Link>
-      ))}
+    <div className="category-grid">
+      {categories.map((cat) => {
+        const { color } = getCategoryTileMeta(cat.slug);
+
+        return (
+          <Link
+            key={cat.slug}
+            href={`/services?category=${cat.slug}`}
+            className="category-tile"
+            style={{ "--cat-color": color } as CSSProperties}
+          >
+            <span className="category-icon-wrap" aria-hidden>
+              <CategoryIcon slug={cat.slug} icon={cat.icon} size={24} color={color} />
+            </span>
+            <span className="category-name">{cat.name}</span>
+          </Link>
+        );
+      })}
     </div>
   );
 }

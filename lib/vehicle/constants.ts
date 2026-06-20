@@ -16,10 +16,10 @@ export function getVehicleFlowHref(serviceSlug: string, subSlug?: string): strin
 }
 
 export const RIDE_TYPES = [
-  { id: "bike", label: "Bike", icon: "🏍️", basePaise: 2500, perKmPaise: 800 },
-  { id: "auto", label: "Auto", icon: "🛺", basePaise: 4000, perKmPaise: 1200 },
-  { id: "taxi", label: "Taxi", icon: "🚕", basePaise: 6000, perKmPaise: 1800 },
-  { id: "premium", label: "Premium Cab", icon: "🚗", basePaise: 10000, perKmPaise: 2800 },
+  { id: "bike", label: "Bike", icon: "bike", basePaise: 2500, perKmPaise: 800 },
+  { id: "auto", label: "Auto", icon: "auto", basePaise: 4000, perKmPaise: 1200 },
+  { id: "taxi", label: "Taxi", icon: "taxi", basePaise: 6000, perKmPaise: 1800 },
+  { id: "premium", label: "Premium Cab", icon: "premium", basePaise: 10000, perKmPaise: 2800 },
 ] as const;
 
 export const RENTAL_TYPES = [
@@ -30,11 +30,11 @@ export const RENTAL_TYPES = [
 ] as const;
 
 export const TRANSPORT_VEHICLE_TYPES = [
-  { id: "tata_ace", label: "Tata Ace", icon: "🛻", basePaise: 80000, perKmPaise: 2500 },
-  { id: "pickup", label: "Pickup", icon: "🚙", basePaise: 120000, perKmPaise: 3200 },
-  { id: "mini_truck", label: "Mini Truck", icon: "🚚", basePaise: 180000, perKmPaise: 4500 },
-  { id: "truck", label: "Truck", icon: "🚛", basePaise: 350000, perKmPaise: 7000 },
-  { id: "house_shifting", label: "House shifting", icon: "📦", basePaise: 500000, perKmPaise: 9000 },
+  { id: "tata_ace", label: "Tata Ace", icon: "tata_ace", basePaise: 80000, perKmPaise: 2500 },
+  { id: "pickup", label: "Pickup", icon: "pickup", basePaise: 120000, perKmPaise: 3200 },
+  { id: "mini_truck", label: "Mini Truck", icon: "mini_truck", basePaise: 180000, perKmPaise: 4500 },
+  { id: "truck", label: "Truck", icon: "truck", basePaise: 350000, perKmPaise: 7000 },
+  { id: "house_shifting", label: "House shifting", icon: "house_shifting", basePaise: 500000, perKmPaise: 9000 },
 ] as const;
 
 export const REPAIR_ISSUES = [

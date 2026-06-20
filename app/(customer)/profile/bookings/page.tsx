@@ -3,16 +3,22 @@ import Link from "next/link";
 import { getServerSession } from "@/lib/auth/session";
 import { ProfileSubPage } from "@/components/customer/profile/ProfileSubPage";
 import { ProfileBookingsSummary } from "@/components/customer/profile/ProfileStats";
-import { getUserBookings } from "@/lib/bookings/queries";
-import { formatPrice, formatDate } from "@/lib/format";
+import { getAllUserBookings } from "@/lib/bookings/user-bookings";
+import { formatPrice } from "@/lib/format";
 import { Badge } from "@/components/ui/Badge";
+
+const KIND_LABELS = {
+  service: "Service",
+  vehicle: "Vehicle",
+  accommodation: "Stay",
+} as const;
 
 export default async function ProfileBookingsPage() {
   const session = await getServerSession();
   if (!session) redirect("/booking/otp?redirect=/profile/bookings");
 
-  const bookings = await getUserBookings(session.id);
-  const totalPaise = bookings.reduce((sum, b) => sum + b.quotedAmount, 0);
+  const bookings = await getAllUserBookings(session.id);
+  const totalPaise = bookings.reduce((sum, b) => sum + b.amountPaise, 0);
 
   return (
     <ProfileSubPage title="My bookings">
@@ -27,14 +33,17 @@ export default async function ProfileBookingsPage() {
       ) : (
         <div className="stack">
           {bookings.map((b) => (
-            <Link key={b.id} href={`/booking/track/${b.bookingRef}`} className="card">
+            <Link key={`${b.kind}-${b.id}`} href={b.trackHref} className="card">
               <div className="flex-between">
-                <p className="card-title">{b.service.name}</p>
+                <p className="card-title">{b.title}</p>
                 <Badge status={b.status}>{b.status.replace(/_/g, " ")}</Badge>
               </div>
               <p className="card-text">{b.bookingRef}</p>
               <p className="text-sm text-muted">
-                {formatDate(b.slot)} · {formatPrice(b.quotedAmount)}
+                {KIND_LABELS[b.kind]} · {b.categoryLabel}
+              </p>
+              <p className="text-sm text-muted">
+                {b.dateLabel} · {formatPrice(b.amountPaise)}
               </p>
             </Link>
           ))}

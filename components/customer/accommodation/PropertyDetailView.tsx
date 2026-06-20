@@ -16,8 +16,6 @@ export function PropertyDetailView({ property }: Props) {
       ? `${formatPrice(property.pricePaise)}/night`
       : `${formatPrice(property.pricePaise)}/month`;
 
-  const whatsapp = property.owner.phone.replace(/\D/g, "").replace(/^0/, "91");
-
   return (
     <div className="acc-detail">
       <div className="acc-detail-topbar">
@@ -102,13 +100,11 @@ export function PropertyDetailView({ property }: Props) {
           Book now
         </Link>
         <a
-          href={`https://wa.me/${whatsapp}`}
-          target="_blank"
-          rel="noopener noreferrer"
+          href={`tel:${property.owner.phone}`}
           className="btn btn-secondary btn-block"
           style={{ textAlign: "center" }}
         >
-          Chat owner
+          Call owner
         </a>
       </div>
     </div>

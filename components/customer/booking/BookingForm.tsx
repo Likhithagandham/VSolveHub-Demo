@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { formatPrice } from "@/lib/format";
+import { FlaticonIcon } from "@/components/ui/FlaticonIcon";
 
 type Address = {
   id: string;
@@ -133,7 +134,9 @@ export function BookingForm({ serviceId }: BookingFormProps) {
     <div className="stack-lg">
       <div className="card">
         <div className="service-card-header">
-          <span className="service-card-icon">{service.category.icon}</span>
+          <span className="service-card-icon">
+            <FlaticonIcon name={service.category.icon} size={28} color="var(--color-brand)" />
+          </span>
           <div>
             <h2 className="card-title">{service.name}</h2>
             <p className="card-price">{formatPrice(service.pricePaise)}{service.unit === "day" ? "/day" : ""}</p>

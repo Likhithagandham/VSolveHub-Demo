@@ -10,6 +10,7 @@ import { WALLET_BALANCE_PAISE } from "@/lib/profile/section-data";
 import { TRANSPORT_VEHICLE_TYPES } from "@/lib/vehicle/constants";
 import { estimateDistanceKm, estimateTransportFare } from "@/lib/vehicle/pricing";
 import { VehicleFlowHeader } from "./VehicleFlowHeader";
+import { FlaticonIcon } from "@/components/ui/FlaticonIcon";
 
 const STEPS = ["pickup", "drop", "goods", "vehicle", "fare", "driver", "payment"] as const;
 const STEP_LABELS: Record<string, string> = {
@@ -145,7 +146,7 @@ export function TransportBookingFlow() {
           <div className="grid-2">
             {TRANSPORT_VEHICLE_TYPES.map((t) => (
               <button key={t.id} type="button" className={`vendor-card ${vehicleType === t.id ? "selected" : ""}`} onClick={() => setVehicleType(t.id)}>
-                <span className="text-2xl">{t.icon}</span>
+                <FlaticonIcon name={t.icon} size={28} color="var(--color-brand)" />
                 <p className="card-title">{t.label}</p>
                 <p className="text-sm text-muted">from {formatPrice(t.basePaise)}</p>
               </button>

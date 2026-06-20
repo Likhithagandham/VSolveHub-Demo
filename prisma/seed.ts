@@ -3,6 +3,7 @@ import { buildCatalogServices, SERVICE_CATALOG, slugify } from "../lib/catalog/s
 import { VENDOR_SEED_DATA } from "../lib/bookings/vendor-seed-data";
 import { seedAccommodation } from "./seed-accommodation";
 import { seedVehicle } from "./seed-vehicle";
+import { seedProvider } from "./seed-provider";
 
 const prisma = new PrismaClient();
 
@@ -10,6 +11,12 @@ async function main() {
   console.log("Seeding VSolveHub database...");
 
   await prisma.bookingStatusLog.deleteMany();
+  await prisma.jobAssignment.deleteMany();
+  await prisma.jobEarning.deleteMany();
+  await prisma.providerKycDocument.deleteMany();
+  await prisma.providerAvailability.deleteMany();
+  await prisma.worker.deleteMany();
+  await prisma.provider.deleteMany();
   await prisma.booking.deleteMany();
   await prisma.savedService.deleteMany();
   await prisma.vendor.deleteMany();
@@ -130,11 +137,35 @@ async function main() {
     await prisma.bookingStatusLog.create({
       data: { bookingId: booking.id, status: "ACCEPTED" },
     });
+
+    const dispatchBooking = await prisma.booking.create({
+      data: {
+        bookingRef: "VSH-DISPATCH-001",
+        userId: customer.id,
+        serviceId: sampleService.id,
+        addressId: "seed-addr-home",
+        slot: new Date(Date.now() + 3600000).toISOString(),
+        scheduleType: "scheduled",
+        status: "REQUESTED",
+        paymentStatus: "PAID",
+        paymentMethod: "upi",
+        issueDescription: "Need electrician for ceiling fan install",
+        mediaUrls: "[]",
+        vendorAssignmentMode: "auto",
+        baseChargePaise: sampleService.pricePaise,
+        quotedAmount: sampleService.pricePaise,
+        archetype: "A",
+      },
+    });
+    await prisma.bookingStatusLog.create({
+      data: { bookingId: dispatchBooking.id, status: "REQUESTED" },
+    });
   }
 
   const subCount = SERVICE_CATALOG.reduce((n, c) => n + c.subServices.length, 0);
   await seedAccommodation(prisma);
   await seedVehicle(prisma);
+  await seedProvider(prisma);
   console.log(
     `Seed complete — ${count} services across ${SERVICE_CATALOG.length} categories (${subCount} sub-services)`
   );
