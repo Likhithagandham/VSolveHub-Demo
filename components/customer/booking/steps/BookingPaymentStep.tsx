@@ -17,9 +17,10 @@ const PAYMENT_OPTIONS: { id: PaymentMethodType; label: string; detail: string }[
 type Props = {
   draft: BookingDraft;
   totalPaise: number;
+  autoDispatch?: boolean;
 };
 
-export function BookingPaymentStep({ draft, totalPaise }: Props) {
+export function BookingPaymentStep({ draft, totalPaise, autoDispatch = false }: Props) {
   const router = useRouter();
   const [method, setMethod] = useState<PaymentMethodType | null>(draft.paymentMethod);
   const [loading, setLoading] = useState(false);
@@ -30,7 +31,11 @@ export function BookingPaymentStep({ draft, totalPaise }: Props) {
       setError("Please select a payment method");
       return;
     }
-    if (!draft.addressId || !draft.vendorId || !draft.slot) {
+    if (!draft.addressId || !draft.slot) {
+      setError("Booking details incomplete");
+      return;
+    }
+    if (!autoDispatch && !draft.vendorId) {
       setError("Booking details incomplete");
       return;
     }
@@ -45,12 +50,12 @@ export function BookingPaymentStep({ draft, totalPaise }: Props) {
         serviceId: draft.serviceId,
         addressId: draft.addressId,
         slot: draft.slot,
-        vendorId: draft.vendorId,
+        ...(draft.vendorId ? { vendorId: draft.vendorId } : {}),
         issueDescription: draft.issueDescription,
         mediaUrls: draft.mediaUrls,
         scheduleType: draft.scheduleType,
         paymentMethod: method,
-        vendorAssignmentMode: draft.vendorAssignmentMode,
+        vendorAssignmentMode: autoDispatch ? "auto" : draft.vendorAssignmentMode,
       }),
     });
 

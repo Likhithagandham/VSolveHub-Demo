@@ -17,5 +17,5 @@ export default async function PartnerWorkDetailPage({ params }: Props) {
   }
 
   const Detail = mode.workDetail;
-  return <Detail />;
+  return <Detail bookingId={id} />;
 }

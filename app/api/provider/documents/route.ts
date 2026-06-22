@@ -49,7 +49,7 @@ export async function POST(request: Request) {
   const data = {
     status: "SUBMITTED" as const,
     lastFour: isAadhaar ? digits.slice(-4) : null,
-    url: isAadhaar ? null : `mock://${body.docType}/${encodeURIComponent(body.fileName!.trim())}`,
+    ...(isAadhaar ? {} : { url: `mock://${body.docType}/${encodeURIComponent(body.fileName!.trim())}` }),
   };
 
   const doc = existing

@@ -1,10 +1,12 @@
 import { prisma } from "@/lib/db/client";
 import { generateBookingRef } from "@/lib/format";
+import { isMarketplaceBooking } from "@/lib/bookings/archetype";
 import {
   BOOKING_STATUSES,
-  type BookingStatus,
+  type AnyBookingStatus,
   STATUS_MESSAGES,
   normalizeBookingStatus,
+  isMarketplaceStatus,
 } from "@/lib/constants";
 
 const STATUS_INTERVAL_MS = 15_000;
@@ -27,7 +29,10 @@ export async function createBooking(input: {
   vendorAssignmentMode?: string;
 }) {
   const bookingRef = generateBookingRef();
-  const initialStatus = input.vendorId ? "ACCEPTED" : "REQUESTED";
+  const isAutoMarketplace =
+    (input.archetype === "A" || input.archetype === "B") &&
+    (input.vendorAssignmentMode === "auto" || !input.vendorId);
+  const initialStatus = isAutoMarketplace ? "PENDING" : input.vendorId ? "ACCEPTED" : "REQUESTED";
 
   const booking = await prisma.booking.create({
     data: {
@@ -73,10 +78,13 @@ export async function getBookingByRef(ref: string, userId?: string) {
       service: { include: { category: true, subCategory: true } },
       address: true,
       vendor: true,
+      assignedProvider: { include: { worker: true, user: true } },
       statusLogs: { orderBy: { createdAt: "asc" } },
     },
   });
 }
+
+export { isMarketplaceBooking };
 
 export async function getUserBookings(userId: string) {
   return prisma.booking.findMany({
@@ -93,18 +101,21 @@ export async function getUserBookings(userId: string) {
 export function getSimulatedStatus(
   createdAt: Date,
   currentStatus: string
-): BookingStatus {
+): AnyBookingStatus {
   const normalized = normalizeBookingStatus(currentStatus);
+  if (isMarketplaceStatus(currentStatus)) {
+    return normalized;
+  }
   if (normalized === "COMPLETED" || normalized === "CANCELLED") {
     return normalized;
   }
 
-  const activeStatuses = BOOKING_STATUSES.filter((s) => s !== "CANCELLED");
+  const activeStatuses: string[] = BOOKING_STATUSES.filter((s) => s !== "CANCELLED");
   const startIndex = Math.max(activeStatuses.indexOf(normalized), 0);
   const elapsed = Date.now() - createdAt.getTime();
   const steps = Math.floor(elapsed / STATUS_INTERVAL_MS);
   const targetIndex = Math.min(startIndex + steps, activeStatuses.length - 1);
-  return activeStatuses[targetIndex];
+  return activeStatuses[targetIndex] as AnyBookingStatus;
 }
 
 export async function syncBookingStatus(
@@ -112,6 +123,9 @@ export async function syncBookingStatus(
   createdAt: Date,
   currentStatus: string
 ) {
+  if (isMarketplaceStatus(currentStatus)) {
+    return currentStatus;
+  }
   const normalized = normalizeBookingStatus(currentStatus);
   const simulated = getSimulatedStatus(createdAt, normalized);
   if (simulated === normalized) {

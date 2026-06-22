@@ -1,49 +1,72 @@
 import type { PrismaClient } from "@prisma/client";
+import { PARTNER_DEMO_ACCOUNTS } from "../lib/provider/demo-accounts";
 
 export async function seedProvider(prisma: PrismaClient) {
-  const captainUser = await prisma.user.upsert({
-    where: { phone: "9876543211" },
-    update: { name: "Demo Captain" },
-    create: { phone: "9876543211", name: "Demo Captain" },
-  });
+  for (const account of PARTNER_DEMO_ACCOUNTS) {
+    const user = await prisma.user.upsert({
+      where: { phone: account.phone },
+      update: { name: account.name },
+      create: { phone: account.phone, name: account.name },
+    });
 
-  const provider = await prisma.provider.upsert({
-    where: { userId: captainUser.id },
-    update: {
-      providerType: "CAPTAIN",
-      status: "ACTIVE",
-      onboardingCompleted: true,
-    },
-    create: {
-      userId: captainUser.id,
-      providerType: "CAPTAIN",
-      status: "ACTIVE",
-      onboardingCompleted: true,
-      worker: {
-        create: {
-          displayName: "Demo Captain",
-          phone: captainUser.phone,
-          isOnline: true,
-          rating: 4.9,
-          completedJobs: 24,
-          acceptanceRate: 94,
-        },
+    const isCaptain = account.providerType === "CAPTAIN";
+
+    await prisma.provider.upsert({
+      where: { userId: user.id },
+      update: {
+        providerType: account.providerType,
+        status: "ACTIVE",
+        onboardingCompleted: true,
       },
-      kycDocuments: {
-        create: [
-          { docType: "aadhaar", status: "VERIFIED", lastFour: "4321", url: "mock://aadhaar" },
-          { docType: "selfie", status: "VERIFIED", url: "mock://selfie" },
-        ],
+      create: {
+        userId: user.id,
+        providerType: account.providerType,
+        status: "ACTIVE",
+        onboardingCompleted: true,
+        ...(isCaptain
+          ? {
+              worker: {
+                create: {
+                  displayName: account.name,
+                  phone: user.phone,
+                  isOnline: true,
+                  rating: 4.9,
+                  completedJobs: 24,
+                  acceptanceRate: 94,
+                },
+              },
+              kycDocuments: {
+                create: [
+                  { docType: "aadhaar", status: "VERIFIED", lastFour: "4321", url: "mock://aadhaar" },
+                  { docType: "selfie", status: "VERIFIED", url: "mock://selfie" },
+                ],
+              },
+            }
+          : {
+              kycDocuments: {
+                create: [{ docType: "aadhaar", status: "VERIFIED", lastFour: "1234", url: "mock://aadhaar" }],
+              },
+            }),
       },
-    },
-    include: { worker: true },
-  });
+    });
+  }
 
-  await prisma.worker.updateMany({
-    where: { providerId: provider.id },
-    data: { isOnline: true },
-  });
+  const captain = PARTNER_DEMO_ACCOUNTS.find((a) => a.providerType === "CAPTAIN");
+  if (captain) {
+    const captainUser = await prisma.user.findUnique({ where: { phone: captain.phone } });
+    if (captainUser) {
+      const provider = await prisma.provider.findUnique({ where: { userId: captainUser.id } });
+      if (provider) {
+        await prisma.worker.updateMany({
+          where: { providerId: provider.id },
+          data: { isOnline: true },
+        });
+      }
+    }
+  }
 
-  console.log("Provider seed — captain login phone: 9876543211 (OTP 1234)");
-  return provider;
+  console.log("Provider seed — demo logins (OTP 1234):");
+  for (const account of PARTNER_DEMO_ACCOUNTS) {
+    console.log(`  ${account.label}: ${account.phone}`);
+  }
 }

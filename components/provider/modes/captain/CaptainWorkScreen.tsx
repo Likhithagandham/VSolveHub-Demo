@@ -29,7 +29,7 @@ export function CaptainWorkScreen() {
     setLoading(false);
   }, []);
 
-  useCaptainPoll(load, 5000);
+  useCaptainPoll(load, 3000);
 
   if (loading) return <LoadingState label="Loading rides…" variant="partner" />;
 

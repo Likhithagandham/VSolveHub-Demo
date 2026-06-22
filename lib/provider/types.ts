@@ -39,13 +39,15 @@ export type ProviderProfile = {
   } | null;
 };
 
+export type WorkDetailProps = { bookingId: string };
+
 export type ProviderModeDefinition = {
   type: ProviderType;
   label: string;
   dashboard: ComponentType;
   leads: ComponentType;
   work: ComponentType;
-  workDetail: ComponentType;
+  workDetail: ComponentType<WorkDetailProps>;
   calendar: ComponentType;
   earnings: ComponentType;
   profile: ComponentType;

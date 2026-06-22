@@ -6,6 +6,8 @@ import { getVendorById } from "@/lib/bookings/vendors";
 import { bookingSchema } from "@/lib/validation/schemas";
 import { WALLET_BALANCE_PAISE } from "@/lib/profile/section-data";
 import { prisma } from "@/lib/db/client";
+import { resolveServiceArchetype, usesPushDispatch } from "@/lib/bookings/archetype";
+import { dispatchBookingOffers } from "@/lib/fulfillment/push-dispatch";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession();
@@ -31,10 +33,9 @@ export async function POST(req: NextRequest) {
     vendorAssignmentMode,
   } = parsed.data;
 
-  const [service, address, vendor] = await Promise.all([
+  const [service, address] = await Promise.all([
     prisma.service.findUnique({ where: { id: serviceId }, include: { category: true } }),
     prisma.address.findFirst({ where: { id: addressId, userId: session.id } }),
-    getVendorById(vendorId),
   ]);
 
   if (!service) {
@@ -43,8 +44,20 @@ export async function POST(req: NextRequest) {
   if (!address) {
     return NextResponse.json({ error: "Address not found" }, { status: 404 });
   }
-  if (!vendor) {
-    return NextResponse.json({ error: "Professional not found" }, { status: 404 });
+
+  const archetype = resolveServiceArchetype(service.archetype);
+  const assignmentMode = vendorAssignmentMode ?? "auto";
+  const isAutoDispatch = usesPushDispatch(archetype) && assignmentMode === "auto" && !vendorId;
+
+  let vendor = null;
+  if (!isAutoDispatch) {
+    if (!vendorId) {
+      return NextResponse.json({ error: "Professional is required" }, { status: 400 });
+    }
+    vendor = await getVendorById(vendorId);
+    if (!vendor) {
+      return NextResponse.json({ error: "Professional not found" }, { status: 404 });
+    }
   }
 
   const baseChargePaise = service.pricePaise;
@@ -63,15 +76,23 @@ export async function POST(req: NextRequest) {
     slot,
     quotedAmount,
     baseChargePaise,
-    archetype: service.archetype,
-    vendorId,
+    archetype,
+    vendorId: isAutoDispatch ? undefined : vendorId,
     issueDescription,
     mediaUrls,
     paymentStatus,
     paymentMethod,
     scheduleType,
-    vendorAssignmentMode,
+    vendorAssignmentMode: assignmentMode,
   });
+
+  if (isAutoDispatch) {
+    await dispatchBookingOffers(booking.id);
+    const refreshed = await prisma.booking.findUnique({ where: { id: booking.id } });
+    if (refreshed) {
+      booking.status = refreshed.status;
+    }
+  }
 
   return NextResponse.json({
     bookingRef: booking.bookingRef,
@@ -85,6 +106,7 @@ export async function POST(req: NextRequest) {
       : null,
     baseChargePaise: booking.baseChargePaise,
     quotedAmount: booking.quotedAmount,
+    marketplace: isAutoDispatch,
   });
 }
 

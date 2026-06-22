@@ -5,8 +5,9 @@ import { prisma } from "@/lib/db/client";
 import { MOCK_OTP } from "@/lib/constants";
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
-  ASSIGNED: ["ARRIVED"],
-  ACCEPTED: ["ARRIVED"],
+  ASSIGNED: ["PROVIDER_ARRIVING"],
+  ACCEPTED: ["PROVIDER_ARRIVING"],
+  PROVIDER_ARRIVING: ["STARTED"],
   ARRIVED: ["STARTED"],
   ON_THE_WAY: ["STARTED"],
   STARTED: ["COMPLETED"],
@@ -48,7 +49,11 @@ export async function PATCH(request: Request) {
   if (!job) return NextResponse.json({ error: "Job not found" }, { status: 404 });
 
   const nextStatus =
-    body.action === "arrived" ? "ARRIVED" : body.action === "start" ? "STARTED" : "COMPLETED";
+    body.action === "arrived"
+      ? "PROVIDER_ARRIVING"
+      : body.action === "start"
+        ? "STARTED"
+        : "COMPLETED";
 
   if (body.action === "start") {
     const otp = body.otp?.trim() ?? "";

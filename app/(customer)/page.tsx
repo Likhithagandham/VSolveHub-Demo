@@ -4,8 +4,6 @@ import { HeroBanner } from "@/components/customer/home/HeroBanner";
 
 import { HomeGreeting } from "@/components/customer/home/HomeGreeting";
 
-import { SearchBar } from "@/components/customer/home/SearchBar";
-
 import { HomeStatsStrip } from "@/components/customer/home/HomeStatsStrip";
 
 import { QuickServices } from "@/components/customer/home/QuickServices";
@@ -105,8 +103,6 @@ export default async function HomePage() {
       <HeroBanner />
 
       <HomeGreeting name={session?.name} />
-
-      <SearchBar />
 
       <HomeStatsStrip serviceCount={serviceCount} categoryCount={categories.length} />
 

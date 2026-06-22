@@ -1,6 +1,7 @@
 import type { ProviderModeDefinition } from "../../types";
+import { createPortalModeScreens } from "../portal/screens";
 
-import { createScaffoldComponent } from "../scaffold/components";
+const screens = createPortalModeScreens("PROFESSIONAL");
 
 
 
@@ -28,19 +29,13 @@ export const professionalMode: ProviderModeDefinition = {
 
   label: "Professional",
 
-  dashboard: createScaffoldComponent("professional", "Professional", "dashboard"),
-
-  leads: createScaffoldComponent("professional", "Professional", "leads"),
-
-  work: createScaffoldComponent("professional", "Professional", "work"),
-
-  workDetail: createScaffoldComponent("professional", "Professional", "workDetail"),
-
-  calendar: createScaffoldComponent("professional", "Professional", "calendar"),
-
-  earnings: createScaffoldComponent("professional", "Professional", "earnings"),
-
-  profile: createScaffoldComponent("professional", "Professional", "profile"),
+  dashboard: screens.dashboard,
+  leads: screens.leads,
+  work: screens.work,
+  workDetail: screens.workDetail,
+  calendar: screens.calendar,
+  earnings: screens.earnings,
+  profile: screens.profile,
 
   kycConfig: professionalKyc,
 

@@ -24,7 +24,7 @@ type JobDetail = {
 function tripStage(status: string): CaptainTripStage {
   if (status === "COMPLETED") return "completed";
   if (status === "STARTED" || status === "ON_THE_WAY") return "riding";
-  if (status === "ARRIVED") return "otp";
+  if (status === "PROVIDER_ARRIVING" || status === "ARRIVED") return "otp";
   return "pickup";
 }
 

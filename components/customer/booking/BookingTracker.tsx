@@ -14,6 +14,7 @@ type TrackingData = {
   bookingRef: string;
   status: string;
   message: string;
+  marketplace?: boolean;
   service: { id: string; name: string };
   issueDescription: string;
   mediaUrls: string[];
@@ -21,6 +22,13 @@ type TrackingData = {
   scheduleType: string;
   address: string;
   vendor: { id: string; name: string; phone: string; rating: number } | null;
+  provider: {
+    id: string;
+    name: string;
+    phone: string;
+    rating: number;
+    etaMinutes: number;
+  } | null;
   quotedAmount: number;
   finalAmountPaise: number;
   paymentStatus: string;
@@ -33,6 +41,7 @@ export function BookingTracker({ bookingRef }: { bookingRef: string }) {
   const [data, setData] = useState<TrackingData | null>(null);
   const [error, setError] = useState("");
   const [cancelling, setCancelling] = useState(false);
+  const [retrying, setRetrying] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -54,7 +63,7 @@ export function BookingTracker({ bookingRef }: { bookingRef: string }) {
     }
 
     fetchStatus();
-    const interval = setInterval(fetchStatus, 5000);
+    const interval = setInterval(fetchStatus, 3000);
     return () => {
       active = false;
       clearInterval(interval);
@@ -72,6 +81,16 @@ export function BookingTracker({ bookingRef }: { bookingRef: string }) {
     }
   }
 
+  async function retrySearch() {
+    setRetrying(true);
+    const res = await fetch(`/api/bookings/${bookingRef}/retry`, { method: "POST" });
+    setRetrying(false);
+    if (res.ok) {
+      const updated = await fetch(`/api/bookings/${bookingRef}`);
+      if (updated.ok) setData(await updated.json());
+    }
+  }
+
   if (error) {
     return <div className="alert alert-error">{error}</div>;
   }
@@ -81,7 +100,13 @@ export function BookingTracker({ bookingRef }: { bookingRef: string }) {
   }
 
   const status = normalizeBookingStatus(data.status);
-  const canCancel = !["COMPLETED", "CANCELLED", "STARTED"].includes(status);
+  const canCancel = !["COMPLETED", "CANCELLED", "STARTED", "NO_WORKER_FOUND"].includes(status);
+  const professional = data.provider ?? data.vendor;
+  const showProvider =
+    professional &&
+    ["ASSIGNED", "PROVIDER_ARRIVING", "STARTED", "COMPLETED", "ACCEPTED", "ON_THE_WAY"].includes(
+      status
+    );
 
   return (
     <div className="stack-lg">
@@ -96,18 +121,42 @@ export function BookingTracker({ bookingRef }: { bookingRef: string }) {
         <p className="alert alert-info mt-2">{data.message}</p>
       </div>
 
+      {status === "NO_WORKER_FOUND" && (
+        <div className="card stack">
+          <h2 className="section-title">No provider found</h2>
+          <p className="text-sm text-muted">
+            We could not find an available provider right now. You can retry, schedule for later, or
+            get notified when someone is free.
+          </p>
+          <div className="booking-action-row">
+            <Button onClick={retrySearch} loading={retrying} disabled={retrying}>
+              Retry
+            </Button>
+            <Link href={`/booking?serviceId=${data.service.id}`} className="btn btn-secondary btn-sm">
+              Schedule later
+            </Link>
+            <button type="button" className="btn btn-secondary btn-sm" disabled>
+              Notify me
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="card">
         <h2 className="section-title">Status</h2>
-        <StatusTimeline currentStatus={status} />
+        <StatusTimeline currentStatus={status} marketplace={data.marketplace} />
       </div>
 
-      {data.vendor && (
+      {showProvider && professional && (
         <div className="card stack">
-          <h2 className="section-title">Your professional</h2>
-          <p className="card-title">{data.vendor.name}</p>
-          <p className="text-sm text-muted">★ {data.vendor.rating.toFixed(1)}</p>
+          <h2 className="section-title">Your provider</h2>
+          <p className="card-title">{professional.name}</p>
+          <p className="text-sm text-muted">★ {professional.rating.toFixed(1)}</p>
+          {data.provider && status === "ASSIGNED" && (
+            <p className="text-sm">ETA ~{data.provider.etaMinutes} min</p>
+          )}
           <div className="booking-action-row">
-            <a href={`tel:${data.vendor.phone}`} className="btn btn-secondary btn-sm">
+            <a href={`tel:${professional.phone}`} className="btn btn-secondary btn-sm">
               Call
             </a>
           </div>
@@ -156,7 +205,11 @@ export function BookingTracker({ bookingRef }: { bookingRef: string }) {
       )}
 
       {status === "COMPLETED" && (
-        <Link href={`/booking/complete/${bookingRef}`} className="btn btn-primary btn-block" style={{ textAlign: "center" }}>
+        <Link
+          href={`/booking/complete/${bookingRef}`}
+          className="btn btn-primary btn-block"
+          style={{ textAlign: "center" }}
+        >
           View invoice &amp; rate
         </Link>
       )}

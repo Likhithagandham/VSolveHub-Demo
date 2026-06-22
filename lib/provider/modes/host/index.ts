@@ -1,6 +1,7 @@
 import type { ProviderModeDefinition } from "../../types";
+import { createPortalModeScreens } from "../portal/screens";
 
-import { createScaffoldComponent } from "../scaffold/components";
+const screens = createPortalModeScreens("PROPERTY_HOST");
 
 
 
@@ -10,19 +11,13 @@ export const hostMode: ProviderModeDefinition = {
 
   label: "Host",
 
-  dashboard: createScaffoldComponent("host", "Host", "dashboard"),
-
-  leads: createScaffoldComponent("host", "Host", "leads"),
-
-  work: createScaffoldComponent("host", "Host", "work"),
-
-  workDetail: createScaffoldComponent("host", "Host", "workDetail"),
-
-  calendar: createScaffoldComponent("host", "Host", "calendar"),
-
-  earnings: createScaffoldComponent("host", "Host", "earnings"),
-
-  profile: createScaffoldComponent("host", "Host", "profile"),
+  dashboard: screens.dashboard,
+  leads: screens.leads,
+  work: screens.work,
+  workDetail: screens.workDetail,
+  calendar: screens.calendar,
+  earnings: screens.earnings,
+  profile: screens.profile,
 
   kycConfig: {
 

@@ -56,7 +56,16 @@ export async function getCaptainDashboardStats(providerId: string) {
       prisma.booking.count({
         where: {
           assignedProviderId: providerId,
-          status: { in: ["ASSIGNED", "ACCEPTED", "ARRIVED", "ON_THE_WAY", "STARTED"] },
+          status: {
+            in: [
+              "ASSIGNED",
+              "ACCEPTED",
+              "ARRIVED",
+              "PROVIDER_ARRIVING",
+              "ON_THE_WAY",
+              "STARTED",
+            ],
+          },
         },
       }),
       prisma.booking.count({
@@ -88,7 +97,16 @@ export async function getActiveWork(providerId: string) {
   return prisma.booking.findMany({
     where: {
       assignedProviderId: providerId,
-      status: { in: ["ASSIGNED", "ACCEPTED", "ARRIVED", "ON_THE_WAY", "STARTED"] },
+      status: {
+        in: [
+          "ASSIGNED",
+          "ACCEPTED",
+          "ARRIVED",
+          "PROVIDER_ARRIVING",
+          "ON_THE_WAY",
+          "STARTED",
+        ],
+      },
     },
     include: {
       service: { include: { category: true } },

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "@/lib/auth/session";
 import { PartnerOtpForm } from "@/components/provider/PartnerOtpForm";
+import { PartnerDemoLogin } from "@/components/provider/PartnerDemoLogin";
 
 type PageProps = {
   searchParams: Promise<{ redirect?: string }>;
@@ -28,9 +29,13 @@ export default async function PartnerLoginPage({ searchParams }: PageProps) {
         <p className="partner-auth-eyebrow">Partner portal</p>
         <h1 className="partner-auth-title">Partner sign in</h1>
         <p className="partner-auth-subtitle">
-          Sign in with your partner account to manage jobs, leads, and earnings. Demo captain:{" "}
-          <strong>9876543211</strong> · OTP <strong>1234</strong>.
+          Pick a demo role below for one-tap access, or sign in with your registered partner number.
+          Demo OTP: <strong>1234</strong>.
         </p>
+        <PartnerDemoLogin redirectTo={redirectTo} />
+        <div className="partner-auth-divider">
+          <span>or use phone OTP</span>
+        </div>
         <PartnerOtpForm redirectTo={redirectTo} />
       </div>
     </div>

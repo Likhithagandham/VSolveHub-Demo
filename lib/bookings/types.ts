@@ -28,6 +28,7 @@ export type BookingServiceInfo = {
   name: string;
   pricePaise: number;
   unit?: string;
+  archetype?: string;
   category: { icon: string; slug: string };
 };
 

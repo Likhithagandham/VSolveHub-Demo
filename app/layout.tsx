@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className="app-shell">
+    <html lang="en" suppressHydrationWarning>
+      <body className="app-shell" suppressHydrationWarning>
         <ShellSwitcher>{children}</ShellSwitcher>
       </body>
     </html>

@@ -13,7 +13,7 @@ import { hostMode } from "./host";
 import { studioMode } from "./studio";
 import type { ProviderType } from "../constants";
 
-function CaptainWorkDetailWrapper() {
+function CaptainWorkDetailWrapper(_props: { bookingId: string }) {
   return null;
 }
 

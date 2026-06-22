@@ -52,7 +52,7 @@ export const bookingSchema = z.object({
   serviceId: z.string().min(1, "Service is required"),
   addressId: z.string().min(1, "Address is required"),
   slot: z.string().min(1, "Time slot is required"),
-  vendorId: z.string().min(1, "Professional is required"),
+  vendorId: z.string().min(1, "Professional is required").optional(),
   issueDescription: z.string().trim().max(1000).optional(),
   mediaUrls: z.array(z.string().min(1)).max(5).optional(),
   scheduleType: z.enum(["instant", "scheduled"]),

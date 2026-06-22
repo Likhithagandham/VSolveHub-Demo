@@ -1,6 +1,7 @@
 import type { ProviderModeDefinition } from "../../types";
+import { createPortalModeScreens } from "../portal/screens";
 
-import { createScaffoldComponent } from "../scaffold/components";
+const screens = createPortalModeScreens("EVENT_VENDOR");
 
 
 
@@ -10,19 +11,13 @@ export const studioMode: ProviderModeDefinition = {
 
   label: "Studio",
 
-  dashboard: createScaffoldComponent("studio", "Studio", "dashboard"),
-
-  leads: createScaffoldComponent("studio", "Studio", "leads"),
-
-  work: createScaffoldComponent("studio", "Studio", "work"),
-
-  workDetail: createScaffoldComponent("studio", "Studio", "workDetail"),
-
-  calendar: createScaffoldComponent("studio", "Studio", "calendar"),
-
-  earnings: createScaffoldComponent("studio", "Studio", "earnings"),
-
-  profile: createScaffoldComponent("studio", "Studio", "profile"),
+  dashboard: screens.dashboard,
+  leads: screens.leads,
+  work: screens.work,
+  workDetail: screens.workDetail,
+  calendar: screens.calendar,
+  earnings: screens.earnings,
+  profile: screens.profile,
 
   kycConfig: {
 

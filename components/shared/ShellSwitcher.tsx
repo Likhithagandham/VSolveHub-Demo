@@ -12,10 +12,10 @@ export function ShellSwitcher({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <>
+    <div suppressHydrationWarning>
       <AppHeader />
       <main className="main-content">{children}</main>
       <BottomNav />
-    </>
+    </div>
   );
 }

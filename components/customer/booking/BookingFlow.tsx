@@ -10,6 +10,7 @@ import { BookingVendorStep } from "./steps/BookingVendorStep";
 import { BookingSummaryStep } from "./steps/BookingSummaryStep";
 import { BookingPaymentStep } from "./steps/BookingPaymentStep";
 import { getInstantSlot } from "@/lib/bookings/slots";
+import { usesPushDispatch } from "@/lib/bookings/archetype";
 import { LoadingState } from "@/components/ui/LoadingState";
 import type {
   BookingDraft,
@@ -101,10 +102,15 @@ export function BookingFlow({ serviceId }: Props) {
       });
   }, [draft.addressId, serviceId, step]);
 
+  const autoDispatch = service ? usesPushDispatch(service.archetype ?? "A") : false;
+  const flowSteps: BookingStep[] = autoDispatch
+    ? ["details", "address", "schedule", "summary", "payment"]
+    : ["details", "address", "schedule", "vendor", "summary", "payment"];
+
   function goNext() {
-    const index = ["details", "address", "schedule", "vendor", "summary", "payment"].indexOf(step);
-    if (index < 5) {
-      setStep(["details", "address", "schedule", "vendor", "summary", "payment"][index + 1] as BookingStep);
+    const index = flowSteps.indexOf(step);
+    if (index < flowSteps.length - 1) {
+      setStep(flowSteps[index + 1]);
     }
   }
 
@@ -147,7 +153,7 @@ export function BookingFlow({ serviceId }: Props) {
         />
       )}
 
-      {step === "vendor" && (
+      {step === "vendor" && !autoDispatch && (
         <BookingVendorStep
           serviceId={serviceId}
           addressId={draft.addressId}
@@ -163,12 +169,14 @@ export function BookingFlow({ serviceId }: Props) {
           service={service}
           draft={draft}
           address={selectedAddress}
-          vendor={selectedVendor}
+          vendor={autoDispatch ? null : selectedVendor}
           onNext={goNext}
         />
       )}
 
-      {step === "payment" && <BookingPaymentStep draft={draft} totalPaise={totalPaise} />}
+      {step === "payment" && (
+        <BookingPaymentStep draft={draft} totalPaise={totalPaise} autoDispatch={autoDispatch} />
+      )}
     </div>
   );
 }

@@ -105,7 +105,7 @@ export function PartnerOtpForm({ redirectTo = "/partner/dashboard" }: PartnerOtp
             value={otp}
             onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 4))}
             inputMode="numeric"
-            hint="Demo OTP: 1234 · Demo captain: 9876543211"
+            hint="Demo OTP: 1234"
           />
           {error && <div className="alert alert-error">{error}</div>}
           <Button

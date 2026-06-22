@@ -7,6 +7,7 @@ type Props = {
   rating: number;
   onMenu: () => void;
   onNotifications?: () => void;
+  unreadCount?: number;
 };
 
 function initials(name: string) {
@@ -18,7 +19,7 @@ function initials(name: string) {
     .toUpperCase();
 }
 
-export function CaptainTopBar({ name, rating, onMenu, onNotifications }: Props) {
+export function CaptainTopBar({ name, rating, onMenu, onNotifications, unreadCount = 0 }: Props) {
   return (
     <header className="rapido-topbar">
       <button type="button" className="rapido-topbar-menu" onClick={onMenu} aria-label="Open menu">
@@ -40,7 +41,9 @@ export function CaptainTopBar({ name, rating, onMenu, onNotifications }: Props) 
         aria-label="Notifications"
       >
         <FlaticonIcon name="bell" size={20} />
-        <span className="rapido-topbar-bell-dot" aria-hidden />
+        {unreadCount > 0 && (
+          <span className="rapido-topbar-bell-badge">{unreadCount > 9 ? "9+" : unreadCount}</span>
+        )}
       </button>
     </header>
   );

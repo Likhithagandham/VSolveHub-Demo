@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "@/lib/auth/session";
 import { getProviderByUserId, getPendingOffers } from "@/lib/provider/queries";
-import { acceptOffer, declineOffer } from "@/lib/fulfillment/dispatch";
+import {
+  acceptOffer,
+  declineOffer,
+  processExpiredOffersAndRedispatch,
+} from "@/lib/fulfillment/push-dispatch";
 import { OFFER_TTL_SECONDS } from "@/lib/provider/constants";
 import { estimateTripDistances } from "@/lib/provider/captain/distance";
 
@@ -13,10 +17,15 @@ export async function GET() {
   if (!provider) return NextResponse.json({ error: "Provider not found" }, { status: 404 });
 
   const offers = await getPendingOffers(provider.id);
+
+  const bookingIds = [...new Set(offers.map((o) => o.bookingId))];
+  await Promise.all(bookingIds.map((id) => processExpiredOffersAndRedispatch(id)));
+
+  const freshOffers = await getPendingOffers(provider.id);
   const worker = provider.worker;
   return NextResponse.json({
     ttlSeconds: OFFER_TTL_SECONDS,
-    offers: offers.map((o) => {
+    offers: freshOffers.map((o) => {
       const dist =
         worker != null
           ? estimateTripDistances(
@@ -72,5 +81,9 @@ export async function POST(request: Request) {
 
   const result = await acceptOffer(body.assignmentId, provider.id);
   if (!result.ok) return NextResponse.json({ error: result.error }, { status: 409 });
-  return NextResponse.json({ ok: true, bookingId: result.bookingId });
+  return NextResponse.json({
+    ok: true,
+    bookingId: result.bookingId,
+    bookingRef: result.bookingRef,
+  });
 }
