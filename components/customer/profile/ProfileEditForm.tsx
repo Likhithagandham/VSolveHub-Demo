@@ -63,8 +63,8 @@ export function ProfileEditForm({ name, phone }: Props) {
           Phone number is tied to your login and cannot be changed here.
         </p>
         {error ? <p className="form-error">{error}</p> : null}
-        <Button type="submit" disabled={loading || !fullName.trim()}>
-          {loading ? "Saving…" : "Save changes"}
+        <Button type="submit" loading={loading} disabled={loading || !fullName.trim()}>
+          Save changes
         </Button>
       </form>
     </ProfileSubPage>

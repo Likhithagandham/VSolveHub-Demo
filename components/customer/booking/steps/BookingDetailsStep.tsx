@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { Spinner } from "@/components/ui/Spinner";
 import { Textarea } from "@/components/ui/Textarea";
 import type { BookingServiceInfo } from "@/lib/bookings/types";
 import { formatPrice } from "@/lib/format";
@@ -93,9 +94,10 @@ export function BookingDetailsStep({
             variant="secondary"
             size="sm"
             onClick={() => fileRef.current?.click()}
+            loading={uploading}
             disabled={uploading || mediaUrls.length >= 5}
           >
-            {uploading ? "Uploading…" : "+ Add photos"}
+            + Add photos
           </Button>
           {mediaUrls.length > 0 && (
             <div className="booking-media-grid">

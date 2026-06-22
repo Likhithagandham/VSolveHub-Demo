@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { formatPrice, formatDate } from "@/lib/format";
 import { STATUS_LABELS, normalizeBookingStatus } from "@/lib/constants";
+import { LoadingState } from "@/components/ui/LoadingState";
 
 type TrackingData = {
   bookingRef: string;
@@ -76,7 +77,7 @@ export function BookingTracker({ bookingRef }: { bookingRef: string }) {
   }
 
   if (!data) {
-    return <p className="text-muted">Loading booking status…</p>;
+    return <LoadingState label="Loading booking status…" variant="inline" />;
   }
 
   const status = normalizeBookingStatus(data.status);

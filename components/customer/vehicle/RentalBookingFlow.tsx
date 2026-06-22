@@ -203,7 +203,7 @@ export function RentalBookingFlow() {
           {error && <p className="alert alert-error">{error}</p>}
           <div className="booking-action-row">
             <Button variant="secondary" onClick={() => setStep("summary")}>Back</Button>
-            <Button onClick={confirm} disabled={loading}>{loading ? "Booking…" : "Confirm rental"}</Button>
+            <Button onClick={confirm} loading={loading} disabled={loading}>Confirm rental</Button>
           </div>
         </div>
       )}

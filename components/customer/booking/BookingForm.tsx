@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { formatPrice } from "@/lib/format";
 import { FlaticonIcon } from "@/components/ui/FlaticonIcon";
+import { LoadingState } from "@/components/ui/LoadingState";
 
 type Address = {
   id: string;
@@ -127,7 +128,7 @@ export function BookingForm({ serviceId }: BookingFormProps) {
   }
 
   if (!service) {
-    return <p className="text-muted">Loading service details…</p>;
+    return <LoadingState label="Loading service details…" variant="inline" />;
   }
 
   return (
@@ -197,7 +198,7 @@ export function BookingForm({ serviceId }: BookingFormProps) {
 
       {error && <div className="alert alert-error">{error}</div>}
 
-      <Button onClick={confirmBooking} disabled={loading} block>
+      <Button onClick={confirmBooking} loading={loading} disabled={loading} block>
         Confirm booking
       </Button>
     </div>

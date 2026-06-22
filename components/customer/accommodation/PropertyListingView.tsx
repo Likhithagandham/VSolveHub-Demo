@@ -6,6 +6,8 @@ import { PropertyCard } from "./PropertyCard";
 import { ACCOMMODATION_TYPES } from "@/lib/accommodation/constants";
 import type { PropertyListItem } from "@/lib/accommodation/types";
 import type { AccommodationTypeSlug } from "@/lib/accommodation/constants";
+import { LoadingState } from "@/components/ui/LoadingState";
+import { Spinner } from "@/components/ui/Spinner";
 
 type FilterState = {
   budgetMax: string;
@@ -139,7 +141,13 @@ export function PropertyListingView() {
 
       <div className="acc-filter-bar">
         <span className="acc-results-count">
-          {loading ? "Searching…" : `${properties.length} propert${properties.length === 1 ? "y" : "ies"}`}
+          {loading ? (
+            <>
+              <Spinner size="sm" /> Searching…
+            </>
+          ) : (
+            `${properties.length} propert${properties.length === 1 ? "y" : "ies"}`
+          )}
         </span>
         <button type="button" className="acc-filter-trigger" onClick={openFilters}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -320,7 +328,7 @@ export function PropertyListingView() {
       )}
 
       {loading ? (
-        <p className="text-muted acc-loading">Loading properties…</p>
+        <LoadingState label="Loading properties…" className="acc-loading" />
       ) : properties.length === 0 ? (
         <div className="empty-state">
           <p>No properties match your filters.</p>

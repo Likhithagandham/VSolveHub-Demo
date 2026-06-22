@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { LoadingState } from "@/components/ui/LoadingState";
 
 type ProfileResponse = {
   profile: {
@@ -35,7 +36,7 @@ export function CaptainProfileScreen() {
     });
   }
 
-  if (!data) return <p className="partner-muted">Loading profile…</p>;
+  if (!data) return <LoadingState label="Loading profile…" variant="partner" />;
 
   return (
     <div className="partner-stack">

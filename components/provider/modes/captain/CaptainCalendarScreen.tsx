@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { LoadingState } from "@/components/ui/LoadingState";
 
 type AvailabilityRow = {
   id: string;
@@ -15,6 +16,7 @@ const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export function CaptainCalendarScreen() {
   const [rows, setRows] = useState<AvailabilityRow[]>([]);
+  const [loading, setLoading] = useState(true);
   const [leaveDate, setLeaveDate] = useState("");
   const [blockDate, setBlockDate] = useState("");
 
@@ -24,6 +26,7 @@ export function CaptainCalendarScreen() {
       const json = await res.json();
       setRows(json.availability ?? []);
     }
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -61,6 +64,8 @@ export function CaptainCalendarScreen() {
   const weekly = rows.filter((r) => r.type === "WEEKLY");
   const leaves = rows.filter((r) => r.type === "LEAVE");
   const blocked = rows.filter((r) => r.type === "BLOCKED");
+
+  if (loading) return <LoadingState label="Loading calendar…" variant="partner" />;
 
   return (
     <div className="partner-stack">

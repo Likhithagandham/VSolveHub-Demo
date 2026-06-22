@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { formatPrice } from "@/lib/format";
 import { VEHICLE_STATUS_LABELS } from "@/lib/vehicle/constants";
+import { LoadingState } from "@/components/ui/LoadingState";
 
 type TrackingData = {
   bookingRef: string;
@@ -56,7 +57,7 @@ export function VehicleTracker({ bookingRef }: { bookingRef: string }) {
   }
 
   if (error) return <div className="alert alert-error">{error}</div>;
-  if (!data) return <p className="text-muted">Loading…</p>;
+  if (!data) return <LoadingState label="Loading booking…" variant="inline" />;
 
   const canCancel = !["COMPLETED", "CANCELLED"].includes(data.status);
   const assignee = data.driver ?? data.vendor;

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { formatPrice } from "@/lib/format";
+import { LoadingState } from "@/components/ui/LoadingState";
 
 type DashboardData = {
   isOnline: boolean;
@@ -49,7 +50,7 @@ export function CaptainDashboard() {
     }
   }
 
-  if (loading) return <p className="partner-muted">Loading dashboard…</p>;
+  if (loading) return <LoadingState label="Loading dashboard…" variant="partner" />;
   if (!data) {
     return (
       <div className="partner-empty">

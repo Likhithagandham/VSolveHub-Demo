@@ -29,7 +29,7 @@ export function SaveServiceButton({ serviceId, initialSaved = false }: SaveButto
   }
 
   return (
-    <Button variant="secondary" size="sm" onClick={toggle} disabled={loading}>
+    <Button variant="secondary" size="sm" onClick={toggle} loading={loading} disabled={loading}>
       {saved ? "Saved ♥" : "Save"}
     </Button>
   );

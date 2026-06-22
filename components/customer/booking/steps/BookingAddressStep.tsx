@@ -198,8 +198,8 @@ export function BookingAddressStep({
 
       {error && <div className="alert alert-error">{error}</div>}
 
-      <Button onClick={handleNext} disabled={loading} block>
-        {loading ? "Saving…" : "Next"}
+      <Button onClick={handleNext} loading={loading} disabled={loading} block>
+        Next
       </Button>
     </div>
   );

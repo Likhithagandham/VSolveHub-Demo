@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { LoadingState } from "@/components/ui/LoadingState";
 import { formatPrice } from "@/lib/format";
 
 type JobDetail = {
@@ -47,7 +48,7 @@ export function CaptainWorkDetail({ bookingId }: { bookingId: string }) {
     await load();
   }
 
-  if (!job) return <p className="partner-muted">Loading job…</p>;
+  if (!job) return <LoadingState label="Loading job…" variant="partner" />;
 
   const mapsUrl =
     job.address.lat && job.address.lng

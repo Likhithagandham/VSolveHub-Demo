@@ -88,8 +88,8 @@ export function BookingPaymentStep({ draft, totalPaise }: Props) {
 
       {error && <div className="alert alert-error">{error}</div>}
 
-      <Button onClick={confirmBooking} disabled={loading} block>
-        {loading ? "Processing…" : "Confirm booking"}
+      <Button onClick={confirmBooking} loading={loading} disabled={loading} block>
+        Confirm booking
       </Button>
     </div>
   );

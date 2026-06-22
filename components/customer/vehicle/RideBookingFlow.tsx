@@ -172,7 +172,7 @@ export function RideBookingFlow() {
           {error && <p className="alert alert-error">{error}</p>}
           <div className="booking-action-row">
             <Button variant="secondary" onClick={() => setStep("driver")}>Back</Button>
-            <Button onClick={confirm} disabled={loading}>{loading ? "Booking…" : "Confirm ride"}</Button>
+            <Button onClick={confirm} loading={loading} disabled={loading}>Confirm ride</Button>
           </div>
         </div>
       )}

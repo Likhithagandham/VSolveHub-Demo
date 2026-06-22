@@ -65,7 +65,7 @@ export function OtpForm({ redirectTo = "/booking" }: OtpFormProps) {
             hint="We'll send a one-time password to verify your number"
           />
           {error && <div className="alert alert-error">{error}</div>}
-          <Button onClick={sendOtp} disabled={loading || phone.length !== 10} block>
+          <Button onClick={sendOtp} loading={loading} disabled={loading || phone.length !== 10} block>
             Send OTP
           </Button>
         </>
@@ -80,7 +80,7 @@ export function OtpForm({ redirectTo = "/booking" }: OtpFormProps) {
             hint="Demo OTP: 1234"
           />
           {error && <div className="alert alert-error">{error}</div>}
-          <Button onClick={verifyOtp} disabled={loading || otp.length < 4} block>
+          <Button onClick={verifyOtp} loading={loading} disabled={loading || otp.length < 4} block>
             Verify & Continue
           </Button>
           <Button variant="secondary" onClick={() => setStep("phone")} disabled={loading}>

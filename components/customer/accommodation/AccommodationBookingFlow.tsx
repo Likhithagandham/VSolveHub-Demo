@@ -255,8 +255,8 @@ export function AccommodationBookingFlow({ property, initialMode }: Props) {
             ))}
           </div>
 
-          <Button block onClick={confirmBooking} disabled={loading}>
-            {loading ? "Processing…" : "Confirm booking"}
+          <Button block onClick={confirmBooking} loading={loading} disabled={loading}>
+            Confirm booking
           </Button>
         </>
       )}

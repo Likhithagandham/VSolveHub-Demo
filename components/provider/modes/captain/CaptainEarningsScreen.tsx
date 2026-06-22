@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { formatPrice } from "@/lib/format";
+import { LoadingState } from "@/components/ui/LoadingState";
 
 type EarningsResponse = {
   summary: {
@@ -30,7 +31,7 @@ export function CaptainEarningsScreen() {
       .then(setData);
   }, []);
 
-  if (!data) return <p className="partner-muted">Loading earnings…</p>;
+  if (!data) return <LoadingState label="Loading earnings…" variant="partner" />;
 
   const { summary, earnings } = data;
 

@@ -96,8 +96,8 @@ export function BookingCompletion({
             onChange={(e) => setReview(e.target.value)}
           />
           {error && <div className="alert alert-error">{error}</div>}
-          <Button onClick={submitReview} disabled={loading} block>
-            {loading ? "Submitting…" : "Submit review"}
+          <Button onClick={submitReview} loading={loading} disabled={loading} block>
+            Submit review
           </Button>
         </div>
       ) : (

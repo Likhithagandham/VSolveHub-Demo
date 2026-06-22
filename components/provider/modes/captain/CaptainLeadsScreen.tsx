@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { formatPrice } from "@/lib/format";
 import { OFFER_TTL_SECONDS } from "@/lib/provider/constants";
+import { LoadingState } from "@/components/ui/LoadingState";
 
 type Offer = {
   id: string;
@@ -25,6 +26,7 @@ function secondsLeft(expiresAt: string) {
 
 export function CaptainLeadsScreen() {
   const [offers, setOffers] = useState<Offer[]>([]);
+  const [loading, setLoading] = useState(true);
   const [tick, setTick] = useState(0);
   const [busy, setBusy] = useState<string | null>(null);
 
@@ -34,6 +36,7 @@ export function CaptainLeadsScreen() {
       const json = await res.json();
       setOffers(json.offers ?? []);
     }
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -58,6 +61,8 @@ export function CaptainLeadsScreen() {
   }
 
   void tick;
+
+  if (loading) return <LoadingState label="Loading offers…" variant="partner" />;
 
   return (
     <div className="partner-stack">

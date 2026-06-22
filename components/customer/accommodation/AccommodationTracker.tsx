@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { formatPrice, formatDate } from "@/lib/format";
 import { ACCOMMODATION_STATUS_LABELS } from "@/lib/accommodation/constants";
+import { LoadingState } from "@/components/ui/LoadingState";
 import { AccommodationStatusTimeline } from "./AccommodationStatusTimeline";
 
 type TrackingData = {
@@ -57,7 +58,7 @@ export function AccommodationTracker({ bookingRef }: { bookingRef: string }) {
   }
 
   if (error) return <div className="alert alert-error">{error}</div>;
-  if (!data) return <p className="text-muted">Loading…</p>;
+  if (!data) return <LoadingState label="Loading booking…" variant="inline" />;
 
   const status = data.status as keyof typeof ACCOMMODATION_STATUS_LABELS;
   const canCancel = !["CHECKED_IN", "CANCELLED"].includes(data.status);

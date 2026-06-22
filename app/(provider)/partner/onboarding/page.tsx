@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { PROVIDER_TYPES, type ProviderType } from "@/lib/provider/constants";
 import { resolveMode } from "@/lib/provider/modes";
 import { PartnerLogoutButton } from "@/components/provider/PartnerLogoutButton";
+import { LoadingState } from "@/components/ui/LoadingState";
+import { Spinner } from "@/components/ui/Spinner";
 
 const TYPE_LABELS: Record<ProviderType, string> = {
   CAPTAIN: "Captain (dispatch)",
@@ -79,7 +81,7 @@ export default function PartnerOnboardingPage() {
         <PartnerLogoutButton className="partner-header-link partner-onboarding-logout" />
       </div>
 
-      {checking && <p className="partner-muted">Loading…</p>}
+      {checking && <LoadingState label="Loading…" variant="partner" />}
 
       {!checking && step === "type" && !existing && (
         <div className="partner-card partner-stack">
@@ -95,8 +97,15 @@ export default function PartnerOnboardingPage() {
               {TYPE_LABELS[type]}
             </label>
           ))}
-          <button type="button" className="btn btn-primary btn-block" disabled={loading} onClick={registerType}>
-            Continue
+          <button type="button" className="btn btn-primary btn-block btn-loading" disabled={loading} onClick={registerType}>
+            {loading ? (
+              <span className="btn-inner">
+                <Spinner size="sm" className="btn-spinner" />
+                <span>Continuing…</span>
+              </span>
+            ) : (
+              "Continue"
+            )}
           </button>
         </div>
       )}
@@ -128,8 +137,15 @@ export default function PartnerOnboardingPage() {
               )}
             </div>
           ))}
-          <button type="button" className="btn btn-primary btn-block" disabled={loading} onClick={submitKyc}>
-            Submit &amp; go to dashboard
+          <button type="button" className="btn btn-primary btn-block btn-loading" disabled={loading} onClick={submitKyc}>
+            {loading ? (
+              <span className="btn-inner">
+                <Spinner size="sm" className="btn-spinner" />
+                <span>Submitting…</span>
+              </span>
+            ) : (
+              "Submit & go to dashboard"
+            )}
           </button>
         </div>
       )}

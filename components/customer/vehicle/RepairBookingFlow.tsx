@@ -194,7 +194,7 @@ export function RepairBookingFlow() {
           {error && <p className="alert alert-error">{error}</p>}
           <div className="booking-action-row">
             <Button variant="secondary" onClick={() => setStep("mechanic")}>Back</Button>
-            <Button onClick={confirm} disabled={loading}>{loading ? "Booking…" : "Confirm repair"}</Button>
+            <Button onClick={confirm} loading={loading} disabled={loading}>Confirm repair</Button>
           </div>
         </div>
       )}

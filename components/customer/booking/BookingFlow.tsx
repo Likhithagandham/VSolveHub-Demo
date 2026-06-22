@@ -10,6 +10,7 @@ import { BookingVendorStep } from "./steps/BookingVendorStep";
 import { BookingSummaryStep } from "./steps/BookingSummaryStep";
 import { BookingPaymentStep } from "./steps/BookingPaymentStep";
 import { getInstantSlot } from "@/lib/bookings/slots";
+import { LoadingState } from "@/components/ui/LoadingState";
 import type {
   BookingDraft,
   BookingServiceInfo,
@@ -108,7 +109,7 @@ export function BookingFlow({ serviceId }: Props) {
   }
 
   if (!service) {
-    return <p className="text-muted">Loading service details…</p>;
+    return <LoadingState label="Loading service details…" variant="inline" />;
   }
 
   const totalPaise = service.pricePaise;

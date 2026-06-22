@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { LoadingState } from "@/components/ui/LoadingState";
 import { pickBestVendor } from "@/lib/bookings/vendors";
 import type { VendorAssignmentMode, VendorOption } from "@/lib/bookings/types";
 
@@ -67,7 +68,7 @@ export function BookingVendorStep({
   }
 
   if (loading) {
-    return <p className="text-muted">Finding nearby professionals…</p>;
+    return <LoadingState label="Finding nearby professionals…" variant="inline" />;
   }
 
   return (

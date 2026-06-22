@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { formatPrice } from "@/lib/format";
+import { LoadingState } from "@/components/ui/LoadingState";
 
 type Job = {
   id: string;
@@ -25,6 +26,7 @@ const STATUS_LABELS: Record<string, string> = {
 
 export function CaptainWorkScreen() {
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     const res = await fetch("/api/provider/work");
@@ -32,6 +34,7 @@ export function CaptainWorkScreen() {
       const json = await res.json();
       setJobs(json.jobs ?? []);
     }
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -39,6 +42,8 @@ export function CaptainWorkScreen() {
     const t = setInterval(load, 5000);
     return () => clearInterval(t);
   }, [load]);
+
+  if (loading) return <LoadingState label="Loading jobs…" variant="partner" />;
 
   if (jobs.length === 0) {
     return (
