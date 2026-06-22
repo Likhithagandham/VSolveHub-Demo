@@ -20,9 +20,9 @@ export const KYC_STATUSES = ["PENDING", "SUBMITTED", "VERIFIED", "REJECTED"] as 
 
 export const PARTNER_NAV = [
   { href: "/partner/dashboard", label: "Dashboard", icon: "home" },
-  { href: "/partner/leads", label: "Leads", icon: "leads" },
-  { href: "/partner/work", label: "Work", icon: "work" },
+  { href: "/partner/leads", label: "Leads", icon: "comment-alt" },
+  { href: "/partner/work", label: "Work", icon: "briefcase" },
   { href: "/partner/calendar", label: "Calendar", icon: "calendar" },
-  { href: "/partner/earnings", label: "Earnings", icon: "earnings" },
-  { href: "/partner/profile", label: "Profile", icon: "profile" },
+  { href: "/partner/earnings", label: "Earnings", icon: "wallet" },
+  { href: "/partner/profile", label: "Profile", icon: "user" },
 ] as const;

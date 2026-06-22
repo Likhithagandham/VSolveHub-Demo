@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "@/lib/auth/session";
 import { getProviderByUserId, getActiveWork, getWorkById } from "@/lib/provider/queries";
 import { prisma } from "@/lib/db/client";
+import { MOCK_OTP } from "@/lib/constants";
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
   ASSIGNED: ["ARRIVED"],
@@ -38,12 +39,24 @@ export async function PATCH(request: Request) {
   const provider = await getProviderByUserId(session.id);
   if (!provider) return NextResponse.json({ error: "Provider not found" }, { status: 404 });
 
-  const body = (await request.json()) as { bookingId: string; action: "arrived" | "start" | "complete" };
+  const body = (await request.json()) as {
+    bookingId: string;
+    action: "arrived" | "start" | "complete";
+    otp?: string;
+  };
   const job = await getWorkById(provider.id, body.bookingId);
   if (!job) return NextResponse.json({ error: "Job not found" }, { status: 404 });
 
   const nextStatus =
     body.action === "arrived" ? "ARRIVED" : body.action === "start" ? "STARTED" : "COMPLETED";
+
+  if (body.action === "start") {
+    const otp = body.otp?.trim() ?? "";
+    const refOtp = job.bookingRef.slice(-4);
+    if (otp !== MOCK_OTP && otp !== refOtp) {
+      return NextResponse.json({ error: "Invalid ride OTP" }, { status: 400 });
+    }
+  }
 
   const allowed = VALID_TRANSITIONS[job.status] ?? [];
   if (!allowed.includes(nextStatus)) {
@@ -90,6 +103,7 @@ function serializeJob(
     slot: string;
     quotedAmount: number;
     issueDescription: string;
+    paymentMethod?: string | null;
     service: { name: string; category: { name: string } };
     address: { fullAddress: string; lat: number | null; lng: number | null };
     user: { name: string | null; phone: string };
@@ -105,6 +119,7 @@ function serializeJob(
     issueDescription: job.issueDescription,
     serviceName: job.service.name,
     categoryName: job.service.category.name,
+    paymentMethod: job.paymentMethod ?? "Cash",
     address: {
       full: job.address.fullAddress,
       lat: job.address.lat,

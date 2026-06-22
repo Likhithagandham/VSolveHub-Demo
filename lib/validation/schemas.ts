@@ -1,9 +1,13 @@
 import { z } from "zod";
+import { isValidIndianPhone, normalizePhone } from "./phone";
 
-export const phoneSchema = z
-  .string()
-  .trim()
-  .regex(/^\d{10}$/, "Enter a valid 10-digit phone number");
+export const phoneSchema = z.preprocess(
+  normalizePhone,
+  z
+    .string()
+    .length(10, "Enter a valid 10-digit phone number")
+    .refine(isValidIndianPhone, "Enter a valid Indian mobile number")
+);
 
 export const otpSendSchema = z.object({
   phone: phoneSchema,

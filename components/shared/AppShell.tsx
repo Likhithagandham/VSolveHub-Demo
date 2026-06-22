@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, FormEvent } from "react";
 import {
-  MenuIcon,
   BellIcon,
   WalletIcon,
   PinIcon,
@@ -30,10 +29,6 @@ export function AppHeader() {
   return (
     <header className="app-header">
       <div className="app-header-top">
-        <button type="button" className="icon-btn" aria-label="Menu">
-          <MenuIcon />
-        </button>
-
         <Link href="/" className="brand-logo">
           <span className="brand-v">V</span>
           <span className="brand-text">

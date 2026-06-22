@@ -7,11 +7,11 @@ import { Button } from "@/components/ui/Button";
 import { getApiErrorMessage } from "@/lib/validation/api-error";
 import { normalizePhone, phoneValidationMessage } from "@/lib/validation/phone";
 
-type OtpFormProps = {
+type PartnerOtpFormProps = {
   redirectTo?: string;
 };
 
-export function OtpForm({ redirectTo = "/booking" }: OtpFormProps) {
+export function PartnerOtpForm({ redirectTo = "/partner/dashboard" }: PartnerOtpFormProps) {
   const router = useRouter();
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
@@ -78,16 +78,22 @@ export function OtpForm({ redirectTo = "/booking" }: OtpFormProps) {
       {step === "phone" ? (
         <>
           <Input
-            label="Mobile number"
+            label="Partner phone number"
             placeholder="10-digit mobile number"
             value={phone}
             onChange={(e) => setPhone(normalizePhone(e.target.value))}
             inputMode="numeric"
             autoComplete="tel"
-            hint="We'll send a one-time password to your phone"
+            hint="Use your registered partner mobile number"
           />
           {error && <div className="alert alert-error">{error}</div>}
-          <Button type="button" onClick={sendOtp} loading={loading} disabled={loading || !canSend} block>
+          <Button
+            type="button"
+            onClick={sendOtp}
+            loading={loading}
+            disabled={loading || !canSend}
+            block
+          >
             Send OTP
           </Button>
         </>
@@ -99,11 +105,17 @@ export function OtpForm({ redirectTo = "/booking" }: OtpFormProps) {
             value={otp}
             onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 4))}
             inputMode="numeric"
-            hint="Demo OTP: 1234"
+            hint="Demo OTP: 1234 · Demo captain: 9876543211"
           />
           {error && <div className="alert alert-error">{error}</div>}
-          <Button type="button" onClick={verifyOtp} loading={loading} disabled={loading || otp.length < 4} block>
-            Sign in to customer app
+          <Button
+            type="button"
+            onClick={verifyOtp}
+            loading={loading}
+            disabled={loading || otp.length < 4}
+            block
+          >
+            Sign in to partner portal
           </Button>
           <Button type="button" variant="secondary" onClick={() => setStep("phone")} disabled={loading}>
             Change number

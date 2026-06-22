@@ -1,6 +1,6 @@
 import { requireProviderSession } from "@/lib/provider/auth";
 import { resolveMode } from "@/lib/provider/modes";
-import { CaptainWorkDetail } from "@/components/provider/modes/captain/CaptainWorkDetail";
+import { CaptainActiveTrip } from "@/components/provider/modes/captain/CaptainActiveTrip";
 import { redirect } from "next/navigation";
 
 type Props = { params: Promise<{ id: string }> };
@@ -13,7 +13,7 @@ export default async function PartnerWorkDetailPage({ params }: Props) {
   const mode = resolveMode(profile.providerType);
 
   if (profile.providerType === "CAPTAIN") {
-    return <CaptainWorkDetail bookingId={id} />;
+    return <CaptainActiveTrip bookingId={id} />;
   }
 
   const Detail = mode.workDetail;

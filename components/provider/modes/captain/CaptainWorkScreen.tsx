@@ -1,27 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import Link from "next/link";
 import { formatPrice } from "@/lib/format";
 import { LoadingState } from "@/components/ui/LoadingState";
+import { useCaptainPoll } from "./hooks/useCaptainPoll";
 
 type Job = {
   id: string;
   ref: string;
   status: string;
   serviceName: string;
-  address: { full: string };
-  customer: { name: string; phone: string };
   quotedAmount: number;
   slot: string;
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  ASSIGNED: "Assigned",
-  ACCEPTED: "Assigned",
-  ARRIVED: "Arrived",
-  ON_THE_WAY: "On the way",
-  STARTED: "In progress",
+  customer: { name: string };
 };
 
 export function CaptainWorkScreen() {
@@ -37,38 +29,39 @@ export function CaptainWorkScreen() {
     setLoading(false);
   }, []);
 
-  useEffect(() => {
-    load();
-    const t = setInterval(load, 5000);
-    return () => clearInterval(t);
-  }, [load]);
+  useCaptainPoll(load, 5000);
 
-  if (loading) return <LoadingState label="Loading jobs…" variant="partner" />;
-
-  if (jobs.length === 0) {
-    return (
-      <div className="partner-empty">
-        <p>No active jobs.</p>
-        <Link href="/partner/leads" className="partner-link">
-          Check leads →
-        </Link>
-      </div>
-    );
-  }
+  if (loading) return <LoadingState label="Loading rides…" variant="partner" />;
 
   return (
-    <div className="partner-stack">
-      {jobs.map((job) => (
-        <Link key={job.id} href={`/partner/work/${job.id}`} className="partner-card partner-job-card">
-          <div className="partner-offer-top">
-            <h3>{job.serviceName}</h3>
-            <span className="partner-badge">{STATUS_LABELS[job.status] ?? job.status}</span>
-          </div>
-          <p className="partner-muted">{job.address.full}</p>
-          <p>{job.customer.name}</p>
-          <p className="partner-price">{formatPrice(job.quotedAmount)}</p>
-        </Link>
-      ))}
+    <div className="rapido-page">
+      <h1 className="rapido-page-title">Ride history</h1>
+      {jobs.length === 0 ? (
+        <div className="rapido-empty">
+          <p>No active rides.</p>
+          <Link href="/partner/dashboard" className="rapido-btn rapido-btn-accept">
+            Go online
+          </Link>
+        </div>
+      ) : (
+        <ul className="rapido-ride-list">
+          {jobs.map((job) => (
+            <li key={job.id}>
+              <Link href={`/partner/work/${job.id}`}>
+                <div className="rapido-ride-top">
+                  <strong>{job.serviceName}</strong>
+                  <span className="rapido-badge">{job.status.replace(/_/g, " ")}</span>
+                </div>
+                <p className="rapido-muted">{job.customer.name} · {job.ref}</p>
+                <div className="rapido-ride-bottom">
+                  <span>{new Date(job.slot).toLocaleString()}</span>
+                  <strong>{formatPrice(job.quotedAmount)}</strong>
+                </div>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

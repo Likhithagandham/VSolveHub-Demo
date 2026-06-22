@@ -2,7 +2,7 @@ import type { ProviderModeDefinition } from "../types";
 import { CaptainDashboard } from "@/components/provider/modes/captain/CaptainDashboard";
 import { CaptainLeadsScreen } from "@/components/provider/modes/captain/CaptainLeadsScreen";
 import { CaptainWorkScreen } from "@/components/provider/modes/captain/CaptainWorkScreen";
-import { CaptainWorkDetail } from "@/components/provider/modes/captain/CaptainWorkDetail";
+import { CaptainActiveTrip } from "@/components/provider/modes/captain/CaptainActiveTrip";
 import { CaptainCalendarScreen } from "@/components/provider/modes/captain/CaptainCalendarScreen";
 import { CaptainEarningsScreen } from "@/components/provider/modes/captain/CaptainEarningsScreen";
 import { CaptainProfileScreen } from "@/components/provider/modes/captain/CaptainProfileScreen";
@@ -31,7 +31,7 @@ export const captainMode: ProviderModeDefinition = {
   availabilityConfig: captainAvailabilityConfig,
 };
 
-export { CaptainWorkDetail };
+export { CaptainActiveTrip as CaptainWorkDetail };
 
 const MODE_REGISTRY: Record<ProviderType, ProviderModeDefinition> = {
   CAPTAIN: captainMode,

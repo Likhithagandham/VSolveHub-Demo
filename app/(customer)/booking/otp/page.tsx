@@ -17,9 +17,9 @@ export default async function BookingOtpPage({ searchParams }: PageProps) {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <h1 className="page-title">Verify your phone</h1>
+        <h1 className="page-title">Customer sign in</h1>
         <p className="page-subtitle">
-          Enter your mobile number to continue booking. Demo OTP is <strong>1234</strong>.
+          Sign in to book services, track bookings, and manage your profile. Demo OTP is <strong>1234</strong>.
         </p>
         <OtpForm redirectTo={redirectTo ?? "/booking"} />
       </div>

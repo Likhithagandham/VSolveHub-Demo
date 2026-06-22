@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { LoadingState } from "@/components/ui/LoadingState";
 
 type ProfileResponse = {
@@ -9,7 +10,6 @@ type ProfileResponse = {
     phone: string;
     providerType: string;
     status: string;
-    worker?: { rating: number; completedJobs: number; acceptanceRate: number; isOnline: boolean } | null;
   };
   stats: { rating: number; completedJobs: number; acceptanceRate: number };
   kyc: { docType: string; status: string; lastFour: string | null }[];
@@ -38,59 +38,71 @@ export function CaptainProfileScreen() {
 
   if (!data) return <LoadingState label="Loading profile…" variant="partner" />;
 
+  const verifiedDocs = data.kyc.filter((d) => d.status === "VERIFIED").length;
+
   return (
-    <div className="partner-stack">
-      <div className="partner-card">
-        <h2 className="partner-card-title">{data.profile.name}</h2>
-        <p className="partner-muted">{data.profile.phone}</p>
-        <p className="partner-badge">{data.profile.status}</p>
-      </div>
+    <div className="rapido-page">
+      <h1 className="rapido-page-title">Profile</h1>
 
-      <div className="partner-card">
-        <h3 className="partner-section-title">Personal info</h3>
-        <label className="form-label" htmlFor="captain-name">
-          Display name
-        </label>
-        <input id="captain-name" className="form-input" value={name} onChange={(e) => setName(e.target.value)} />
-        <button type="button" className="btn btn-primary btn-sm mt-2" onClick={saveName}>
-          Save
+      <section className="rapido-card">
+        <h3 className="rapido-card-head">Personal info</h3>
+        <p className="rapido-muted">{data.profile.phone}</p>
+        <div className="form-group rapido-field-block">
+          <label className="form-label" htmlFor="captain-name">
+            Display name
+          </label>
+          <input id="captain-name" className="form-input" value={name} onChange={(e) => setName(e.target.value)} />
+        </div>
+        <button type="button" className="rapido-btn rapido-btn-accept rapido-btn-block" onClick={saveName}>
+          Save name
         </button>
-      </div>
+      </section>
 
-      <div className="partner-stat-grid">
-        <div className="partner-stat-card">
-          <span className="partner-stat-value">★ {data.stats.rating.toFixed(1)}</span>
-          <span className="partner-stat-label">Rating</span>
+      <section className="rapido-card">
+        <h3 className="rapido-card-head">Ratings & jobs</h3>
+        <div className="rapido-perf-grid">
+          <div>
+            <strong>★ {data.stats.rating.toFixed(1)}</strong>
+            <span>Rating</span>
+          </div>
+          <div>
+            <strong>{data.stats.completedJobs}</strong>
+            <span>Completed jobs</span>
+          </div>
+          <div>
+            <strong>{data.stats.acceptanceRate}%</strong>
+            <span>Accept rate</span>
+          </div>
+          <div>
+            <strong>{data.profile.status}</strong>
+            <span>Account status</span>
+          </div>
         </div>
-        <div className="partner-stat-card">
-          <span className="partner-stat-value">{data.stats.completedJobs}</span>
-          <span className="partner-stat-label">Jobs done</span>
-        </div>
-        <div className="partner-stat-card">
-          <span className="partner-stat-value">{data.stats.acceptanceRate}%</span>
-          <span className="partner-stat-label">Accept rate</span>
-        </div>
-        <div className="partner-stat-card">
-          <span className="partner-stat-value">{data.profile.worker?.isOnline ? "Online" : "Offline"}</span>
-          <span className="partner-stat-label">Status</span>
-        </div>
-      </div>
+      </section>
 
-      <div className="partner-card">
-        <h3 className="partner-section-title">KYC status</h3>
+      <section className="rapido-card">
+        <div className="rapido-card-head">
+          <h3>KYC status</h3>
+          <Link href="/partner/documents">View documents</Link>
+        </div>
         {data.kyc.length === 0 ? (
-          <p className="partner-muted">No documents submitted yet.</p>
+          <p className="rapido-muted">No documents submitted yet.</p>
         ) : (
-          <ul className="partner-list">
-            {data.kyc.map((doc) => (
-              <li key={doc.docType}>
-                {doc.docType} — {doc.status}
-                {doc.lastFour ? ` · ••••${doc.lastFour}` : ""}
-              </li>
-            ))}
-          </ul>
+          <>
+            <p className="rapido-muted">
+              {verifiedDocs} of {data.kyc.length} documents verified
+            </p>
+            <ul className="rapido-doc-list rapido-doc-list--compact">
+              {data.kyc.map((doc) => (
+                <li key={doc.docType} className="rapido-doc-item">
+                  <span>{doc.docType.replace(/_/g, " ")}</span>
+                  <span className="rapido-doc-status">{doc.status}</span>
+                </li>
+              ))}
+            </ul>
+          </>
         )}
-      </div>
+      </section>
     </div>
   );
 }

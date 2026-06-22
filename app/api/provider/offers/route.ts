@@ -3,6 +3,7 @@ import { getServerSession } from "@/lib/auth/session";
 import { getProviderByUserId, getPendingOffers } from "@/lib/provider/queries";
 import { acceptOffer, declineOffer } from "@/lib/fulfillment/dispatch";
 import { OFFER_TTL_SECONDS } from "@/lib/provider/constants";
+import { estimateTripDistances } from "@/lib/provider/captain/distance";
 
 export async function GET() {
   const session = await getServerSession();
@@ -12,25 +13,43 @@ export async function GET() {
   if (!provider) return NextResponse.json({ error: "Provider not found" }, { status: 404 });
 
   const offers = await getPendingOffers(provider.id);
+  const worker = provider.worker;
   return NextResponse.json({
     ttlSeconds: OFFER_TTL_SECONDS,
-    offers: offers.map((o) => ({
-      id: o.id,
-      status: o.status,
-      offeredAt: o.offeredAt.toISOString(),
-      expiresAt: o.expiresAt.toISOString(),
-      booking: {
-        id: o.booking.id,
-        ref: o.booking.bookingRef,
-        serviceName: o.booking.service.name,
-        categoryName: o.booking.service.category.name,
-        slot: o.booking.slot,
-        quotedAmount: o.booking.quotedAmount,
-        address: o.booking.address.fullAddress,
-        customerName: o.booking.user.name ?? "Customer",
-        customerPhone: o.booking.user.phone,
-      },
-    })),
+    offers: offers.map((o) => {
+      const dist =
+        worker != null
+          ? estimateTripDistances(
+              worker.lat,
+              worker.lng,
+              o.booking.address.lat,
+              o.booking.address.lng,
+              o.booking.quotedAmount
+            )
+          : { pickupKm: 1.2, dropKm: 4.5 };
+      return {
+        id: o.id,
+        status: o.status,
+        offeredAt: o.offeredAt.toISOString(),
+        expiresAt: o.expiresAt.toISOString(),
+        booking: {
+          id: o.booking.id,
+          ref: o.booking.bookingRef,
+          serviceName: o.booking.service.name,
+          categoryName: o.booking.service.category.name,
+          slot: o.booking.slot,
+          quotedAmount: o.booking.quotedAmount,
+          address: o.booking.address.fullAddress,
+          customerName: o.booking.user.name ?? "Customer",
+          customerPhone: o.booking.user.phone,
+          paymentMode: o.booking.paymentMethod ?? "Cash",
+          pickupKm: dist.pickupKm,
+          dropKm: dist.dropKm,
+          lat: o.booking.address.lat,
+          lng: o.booking.address.lng,
+        },
+      };
+    }),
   });
 }
 

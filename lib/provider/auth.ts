@@ -3,6 +3,7 @@ import { getServerSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/client";
 import type { ProviderType } from "./constants";
 import type { ProviderProfile } from "./types";
+import { partnerLoginPath } from "./login";
 
 export async function getProviderProfile(userId: string): Promise<ProviderProfile | null> {
   const provider = await prisma.provider.findUnique({
@@ -33,7 +34,7 @@ export async function getProviderProfile(userId: string): Promise<ProviderProfil
   };
 }
 
-export async function requireProviderSession(redirectTo = "/booking/otp?redirect=/partner/dashboard") {
+export async function requireProviderSession(redirectTo = partnerLoginPath("/partner/dashboard")) {
   const session = await getServerSession();
   if (!session) redirect(redirectTo);
 
