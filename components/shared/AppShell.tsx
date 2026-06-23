@@ -15,6 +15,7 @@ import {
   MessagesIcon,
   ProfileIcon,
 } from "@/components/ui/AppIcons";
+import { CustomerNotificationBell } from "@/components/notifications/CustomerNotificationBell";
 
 export function AppHeader() {
   const router = useRouter();
@@ -38,10 +39,7 @@ export function AppHeader() {
         </Link>
 
         <div className="header-actions">
-          <button type="button" className="icon-btn notif-btn" aria-label="Notifications">
-            <BellIcon />
-            <span className="notif-dot" />
-          </button>
+          <CustomerNotificationBell />
           <div className="wallet-pill">
             <WalletIcon />
             <span>₹1,250</span>
@@ -55,19 +53,20 @@ export function AppHeader() {
         <ChevronDownIcon />
       </button>
 
-      <form className="header-search" onSubmit={handleSearch}>
-        <div className="header-search-input">
+      <form className="m3-search-bar" onSubmit={handleSearch}>
+        <span className="m3-search-bar__leading" aria-hidden>
           <HeaderSearchIcon />
-          <input
-            type="search"
-            placeholder="Search for services..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            aria-label="Search for services"
-          />
-        </div>
-        <button type="submit" className="header-search-btn">
-          Search
+        </span>
+        <input
+          type="search"
+          className="m3-search-bar__input"
+          placeholder="Search services"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          aria-label="Search for services"
+        />
+        <button type="submit" className="m3-search-bar__submit" aria-label="Search">
+          <HeaderSearchIcon />
         </button>
       </form>
     </header>
@@ -78,6 +77,7 @@ export function BottomNav() {
   const pathname = usePathname();
 
   const isHome = pathname === "/";
+  const isNotifications = pathname === "/notifications";
   const isBookings =
     pathname.startsWith("/profile/bookings") ||
     pathname.startsWith("/booking/track") ||
@@ -85,7 +85,7 @@ export function BottomNav() {
     pathname.startsWith("/accommodation/track");
   const isMessages = pathname.startsWith("/profile/messages");
   const isProfile =
-    pathname.startsWith("/profile") && !isBookings && !isMessages;
+    pathname.startsWith("/profile") && !isBookings && !isMessages && !isNotifications;
 
   return (
     <nav className="bottom-nav">

@@ -9,6 +9,7 @@ export default async function ProfilePage() {
 
   const quickActions = [
     { label: "My bookings", href: "/profile/bookings" },
+    { label: "Notifications", href: "/notifications" },
     { label: "Saved services", href: "/profile/saved" },
     { label: "Help & support", href: "/profile/help" },
   ];

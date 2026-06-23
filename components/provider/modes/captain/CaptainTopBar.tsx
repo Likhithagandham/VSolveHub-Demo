@@ -1,13 +1,13 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { FlaticonIcon } from "@/components/ui/FlaticonIcon";
 
 type Props = {
   name: string;
   rating: number;
   onMenu: () => void;
-  onNotifications?: () => void;
-  unreadCount?: number;
+  notificationBell?: ReactNode;
 };
 
 function initials(name: string) {
@@ -19,7 +19,7 @@ function initials(name: string) {
     .toUpperCase();
 }
 
-export function CaptainTopBar({ name, rating, onMenu, onNotifications, unreadCount = 0 }: Props) {
+export function CaptainTopBar({ name, rating, onMenu, notificationBell }: Props) {
   return (
     <header className="rapido-topbar">
       <button type="button" className="rapido-topbar-menu" onClick={onMenu} aria-label="Open menu">
@@ -34,17 +34,11 @@ export function CaptainTopBar({ name, rating, onMenu, onNotifications, unreadCou
           <p className="rapido-topbar-rating">★ {rating.toFixed(1)}</p>
         </div>
       </div>
-      <button
-        type="button"
-        className="rapido-topbar-bell"
-        onClick={onNotifications}
-        aria-label="Notifications"
-      >
-        <FlaticonIcon name="bell" size={20} />
-        {unreadCount > 0 && (
-          <span className="rapido-topbar-bell-badge">{unreadCount > 9 ? "9+" : unreadCount}</span>
-        )}
-      </button>
+      {notificationBell ?? (
+        <button type="button" className="rapido-topbar-bell" aria-label="Notifications">
+          <FlaticonIcon name="bell" size={20} />
+        </button>
+      )}
     </header>
   );
 }

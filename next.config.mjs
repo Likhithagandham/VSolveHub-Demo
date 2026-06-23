@@ -10,6 +10,12 @@ const nextConfig = {
     "172.25.32.1",
     "*.local",
   ],
+  async redirects() {
+    return [
+      { source: "/provider", destination: "/partner", permanent: false },
+      { source: "/provider/:path*", destination: "/partner/:path*", permanent: false },
+    ];
+  },
 };
 
 export default nextConfig;

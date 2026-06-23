@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { FlaticonIcon } from "@/components/ui/FlaticonIcon";
 import type { ModePortalConfig } from "@/lib/provider/mode-config";
 import { PortalProvider } from "@/lib/provider/modes/portal/context";
-import { getPortalNotifications } from "@/lib/provider/modes/portal/notifications";
+import { ProviderNotificationBell } from "@/components/notifications/ProviderNotificationBell";
 import { ModeSidebar } from "./modes/portal/ModeSidebar";
 import { ModeBottomNav } from "./modes/portal/ModeBottomNav";
-import { ModeNotificationsSheet } from "./modes/portal/ModeNotificationsSheet";
 
 type Props = {
   config: ModePortalConfig;
@@ -16,13 +15,8 @@ type Props = {
 
 export function ModeAppChrome({ config, children }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [notifOpen, setNotifOpen] = useState(false);
-  const [readIds, setReadIds] = useState<Set<string>>(() => new Set());
   const [name, setName] = useState(config.label);
   const [rating, setRating] = useState(4.8);
-
-  const notifications = useMemo(() => getPortalNotifications(config.type), [config.type]);
-  const unreadCount = notifications.filter((n) => !readIds.has(n.id)).length;
 
   useEffect(() => {
     fetch("/api/provider/profile")
@@ -33,14 +27,6 @@ export function ModeAppChrome({ config, children }: Props) {
       })
       .catch(() => undefined);
   }, []);
-
-  function markRead(id: string) {
-    setReadIds((prev) => new Set(prev).add(id));
-  }
-
-  function markAllRead() {
-    setReadIds(new Set(notifications.map((n) => n.id)));
-  }
 
   return (
     <PortalProvider modeType={config.type}>
@@ -56,31 +42,11 @@ export function ModeAppChrome({ config, children }: Props) {
               <p className="mode-topbar-meta">{config.tagline} · ★ {rating.toFixed(1)}</p>
             </div>
           </div>
-          <button
-            type="button"
-            className="mode-topbar-bell"
-            onClick={() => setNotifOpen(true)}
-            aria-label={unreadCount > 0 ? `${unreadCount} unread notifications` : "Notifications"}
-          >
-            <span className="mode-topbar-bell-wrap">
-              <FlaticonIcon name="bell" size={20} />
-              {unreadCount > 0 && (
-                <span className="mode-topbar-bell-badge">{unreadCount > 9 ? "9+" : unreadCount}</span>
-              )}
-            </span>
-          </button>
+          <ProviderNotificationBell />
         </header>
         <main className="mode-main">{children}</main>
         <ModeBottomNav items={config.primaryNav} />
         <ModeSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} items={config.sidebar} />
-        <ModeNotificationsSheet
-          open={notifOpen}
-          onClose={() => setNotifOpen(false)}
-          items={notifications}
-          readIds={readIds}
-          onMarkRead={markRead}
-          onMarkAllRead={markAllRead}
-        />
       </div>
     </PortalProvider>
   );

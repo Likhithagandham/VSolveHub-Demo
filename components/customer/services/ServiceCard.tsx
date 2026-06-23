@@ -11,6 +11,7 @@ export type ServiceCardData = {
   description: string;
   pricePaise: number;
   unit?: string;
+  duration?: string | null;
   category: { slug: string; name: string; icon: string };
   subCategory?: { name: string; slug: string } | null;
 };
@@ -32,65 +33,70 @@ function getBookHref(service: ServiceCardData) {
 }
 
 function getBookLabel(service: ServiceCardData) {
-  if (service.category.slug === "accommodation-services") return "Browse stays";
-  const subSlug = service.subCategory?.slug ?? service.slug;
-  if (getVehicleFlowHref(service.slug, subSlug)) return "Start booking";
-  return "Book Now";
+  if (service.category.slug === "accommodation-services") return "Browse";
+  return "Book now";
 }
 
 export function ServiceCard({ service }: { service: ServiceCardData }) {
-  const isAccommodation = service.category.slug === "accommodation-services";
   const href = `/services/${service.category.slug}/${service.slug}`;
   const bookHref = getBookHref(service);
   const bookLabel = getBookLabel(service);
+  const metaLabel = service.subCategory?.name ?? service.category.name;
 
   return (
-    <article className="card service-card">
-      <div className="service-card-header">
-        <span className="service-card-icon" aria-hidden>
+    <li className="service-list__item">
+      <Link href={href} className="service-list__main">
+        <span className="service-list__icon" aria-hidden>
           <CategoryIcon
             slug={service.category.slug}
             icon={service.category.icon}
-            size={28}
-            color="var(--color-brand)"
+            size={22}
+            color="var(--m3-primary)"
           />
         </span>
-        <div className="service-card-body">
-          <h3 className="card-title">
-            <Link href={href}>{service.name}</Link>
-          </h3>
-          <p className="card-text">
-            {service.subCategory ? `${service.subCategory.name} · ` : ""}
-            {service.description.slice(0, 60)}…
-          </p>
-          <p className="card-price">{formatPriceLabel(service.pricePaise, service.unit)}</p>
-        </div>
-      </div>
-      <div className="service-card-actions">
-        <Link href={href} className="btn btn-secondary btn-sm">
-          Details
-        </Link>
-        <Link href={bookHref} className="btn btn-primary btn-sm">
-          {bookLabel}
-        </Link>
-      </div>
-    </article>
+
+        <span className="service-list__content">
+          <span className="service-list__title">{service.name}</span>
+          <span className="service-list__meta">
+            <span className="service-list__chip">{metaLabel}</span>
+            {service.duration ? (
+              <span className="service-list__chip service-list__chip--muted">{service.duration}</span>
+            ) : null}
+          </span>
+        </span>
+
+        <span className="service-list__trail">
+          <span className="service-list__price">{formatPriceLabel(service.pricePaise, service.unit)}</span>
+          <span className="service-list__chevron" aria-hidden>
+            ›
+          </span>
+        </span>
+      </Link>
+
+      <Link href={bookHref} className="service-list__book">
+        {bookLabel}
+      </Link>
+    </li>
   );
 }
 
 export function ServiceCardList({ services }: { services: ServiceCardData[] }) {
   if (!services.length) {
     return (
-      <div className="empty-state">
+      <div className="m3-empty-state">
         <p>No services found.</p>
+        <Link href="/services" className="m3-btn m3-btn--tonal">
+          Browse all services
+        </Link>
       </div>
     );
   }
+
   return (
-    <div className="grid-2">
+    <ul className="service-list">
       {services.map((service) => (
         <ServiceCard key={service.id} service={service} />
       ))}
-    </div>
+    </ul>
   );
 }

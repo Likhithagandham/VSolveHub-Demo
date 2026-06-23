@@ -8,17 +8,33 @@ export type QuickService = {
   href: string;
 };
 
+/** Top-level categories — single home row (6 tiles). */
 export const QUICK_SERVICES: QuickService[] = [
-  { id: "home", label: "Home Services", icon: "house", color: "#2563eb", href: "/services?category=home-services" },
-  { id: "construction", label: "Construction", icon: "hard-hat", color: "#ca8a04", href: "/services?category=construction-services" },
-  { id: "beauty", label: "Beauty", icon: "beauty", color: "#db2777", href: "/services?category=beauty-wellness" },
-  { id: "events", label: "Events", icon: "calendar", color: "#7c3aed", href: "/services?category=event-media-services" },
-  { id: "rentals", label: "Rentals", icon: "car-front", color: "#16a34a", href: "/services?category=rental-services" },
-  { id: "vehicle", label: "Vehicle", icon: "car-side", color: "#ea580c", href: "/services?category=vehicle-services" },
-  { id: "stay", label: "Stay", icon: "venue", color: "#0891b2", href: "/services?category=accommodation-services" },
-  { id: "jobs", label: "Jobs", icon: "briefcase", color: "#0d9488", href: "/services?category=job-opportunities" },
-  { id: "staff", label: "Manpower", icon: "worker", color: "#dc2626", href: "/services?category=manpower-support-staff" },
-  { id: "all", label: "View All", icon: "grid-four", color: "#38bdf8", href: "/services" },
+  { id: "home", label: "Home", icon: "house", color: "#5b5fc7", href: "/services?category=home-services" },
+  { id: "construction", label: "Build", icon: "hammer", color: "#b45309", href: "/services?category=construction-services" },
+  { id: "beauty", label: "Beauty", icon: "beauty", color: "#c026d3", href: "/services?category=beauty-wellness" },
+  { id: "events", label: "Events", icon: "party", color: "#7c3aed", href: "/services?category=event-media-services" },
+  { id: "vehicle", label: "Vehicle", icon: "wrench", color: "#ea580c", href: "/services?category=vehicle-services" },
+  { id: "all", label: "More", icon: "grid-menu", color: "#6750a4", href: "/services" },
+];
+
+export type TrendingSearch = {
+  label: string;
+  href: string;
+};
+
+/** Specific high-intent searches + categories not in the quick row. */
+export const TRENDING_SEARCHES: TrendingSearch[] = [
+  { label: "AC repair", href: "/services?q=ac" },
+  { label: "House cleaning", href: "/services?q=cleaning" },
+  { label: "Electrician", href: "/services?q=electrical" },
+  { label: "Plumber", href: "/services?q=plumbing" },
+  { label: "Car repair", href: "/vehicle/repair" },
+  { label: "Event decor", href: "/services?q=decor" },
+  { label: "Rentals", href: "/services?category=rental-services" },
+  { label: "Stay", href: "/services?category=accommodation-services" },
+  { label: "Jobs", href: "/services?category=job-opportunities" },
+  { label: "Manpower", href: "/services?category=manpower-support-staff" },
 ];
 
 export const PROMO_CARDS = [
@@ -121,6 +137,39 @@ export const HOW_IT_WORKS = [
   { step: "3", title: "Pro at your door", desc: "Verified professional arrives and completes the job." },
 ];
 
+export const HOME_FAQ = [
+  {
+    question: "What services can I book on V Solve Hub?",
+    answer:
+      "Home repairs, cleaning, construction labour, beauty & wellness, events, equipment rentals, vehicle services, stays, jobs, and manpower — all from one app.",
+  },
+  {
+    question: "How do I book a service?",
+    answer:
+      "Search or pick a category, choose your service, select a time slot, and confirm payment. You'll get a booking reference to track status.",
+  },
+  {
+    question: "Are the professionals verified?",
+    answer:
+      "Yes. Partners go through ID and skill checks before joining. Ratings and reviews help you pick the right pro.",
+  },
+  {
+    question: "Which cities do you cover?",
+    answer:
+      "We currently serve Hyderabad and are expanding across Telangana. Check a service page for availability in your area.",
+  },
+  {
+    question: "What payment methods are accepted?",
+    answer:
+      "UPI, debit/credit cards, V Solve Hub wallet, and cash on completion for select services.",
+  },
+  {
+    question: "Can I cancel or reschedule?",
+    answer:
+      "Yes. Open My bookings, select your booking, and reschedule or cancel. Free rescheduling is available up to 2 hours before your slot.",
+  },
+];
+
 export const HOME_SPOTLIGHTS: {
   id: string;
   title: string;
@@ -161,13 +210,4 @@ export const HOME_SPOTLIGHTS: {
     color: "#db2777",
     bg: "linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%)",
   },
-];
-
-export const TRENDING_SEARCHES = [
-  { label: "AC repair", href: "/services?q=ac" },
-  { label: "House cleaning", href: "/services?q=cleaning" },
-  { label: "Electrician", href: "/services?q=electrical" },
-  { label: "Plumber", href: "/services?q=plumbing" },
-  { label: "Event decor", href: "/services?category=event-media-services" },
-  { label: "Car repair", href: "/vehicle/repair" },
 ];

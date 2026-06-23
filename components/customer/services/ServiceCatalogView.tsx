@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { ServiceIcon } from "@/components/ui/ServiceIcons";
-import { FlaticonIcon } from "@/components/ui/FlaticonIcon";
 import type { IconName } from "@/components/ui/ServiceIcons";
+
+const PREVIEW_LIMIT = 3;
 
 export type CatalogServiceItem = {
   id: string;
@@ -21,6 +21,7 @@ export type CatalogCategoryData = {
   slug: string;
   icon: string;
   headerIcon: IconName;
+  totalCount: number;
   services: CatalogServiceItem[];
 };
 
@@ -29,27 +30,20 @@ type Props = {
 };
 
 export function ServiceCatalogView({ categories }: Props) {
-  const [view, setView] = useState<"categories" | "grid">("categories");
-
   return (
-    <div className="service-catalog">
-      <div className="catalog-header">
-        <div>
-          <h1 className="catalog-title">Our Services</h1>
-          <p className="catalog-subtitle">All Services at your fingertips</p>
-        </div>
-        <button
-          type="button"
-          className="view-categories-btn"
-          onClick={() => setView((v) => (v === "categories" ? "grid" : "categories"))}
-        >
-          <FlaticonIcon name="grid" size={14} />
-          {view === "categories" ? "View as Grid" : "View as Categories"}
-        </button>
-      </div>
+    <div className="services-page">
+      <header className="services-page__header">
+        <h1 className="services-page__title">Our Services</h1>
+        <p className="services-page__meta">Browse by category — tap View all for the full list</p>
+      </header>
 
-      {view === "categories" ? (
-        categories.map((category, catIndex) => (
+      {categories.map((category, catIndex) => {
+        const preview = category.services.slice(0, PREVIEW_LIMIT);
+        const hasMore = category.totalCount > PREVIEW_LIMIT;
+
+        if (preview.length === 0) return null;
+
+        return (
           <section key={category.id} className="catalog-group">
             <div className="catalog-group-header">
               <h2>
@@ -58,13 +52,15 @@ export function ServiceCatalogView({ categories }: Props) {
                 </span>
                 {catIndex + 1}. {category.name.toUpperCase()}
               </h2>
-              <Link href={`/services?category=${category.slug}`} className="section-link">
-                View All →
-              </Link>
+              {hasMore ? (
+                <Link href={`/services?category=${category.slug}`} className="section-link">
+                  View all ({category.totalCount}) →
+                </Link>
+              ) : null}
             </div>
 
             <div className="catalog-service-scroll">
-              {category.services.map((service) => (
+              {preview.map((service) => (
                 <Link key={service.id} href={service.href} className="catalog-service-card">
                   <span className="catalog-service-icon">
                     <ServiceIcon name={service.icon} size={28} color={service.color} />
@@ -75,22 +71,8 @@ export function ServiceCatalogView({ categories }: Props) {
               ))}
             </div>
           </section>
-        ))
-      ) : (
-        <div className="catalog-all-grid">
-          {categories.flatMap((cat) =>
-            cat.services.map((service) => (
-              <Link key={service.id} href={service.href} className="catalog-service-card">
-                <span className="catalog-service-icon">
-                  <ServiceIcon name={service.icon} size={28} color={service.color} />
-                </span>
-                <span className="catalog-service-name">{service.name}</span>
-                <span className="catalog-service-sub">{service.subtitle}</span>
-              </Link>
-            ))
-          )}
-        </div>
-      )}
+        );
+      })}
     </div>
   );
 }

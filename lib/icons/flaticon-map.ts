@@ -53,18 +53,28 @@ export const SERVICE_ICON_MAP = {
   worker: "person-carry-box",
   person: "user",
   "grid-menu": "apps",
+  party: "party-horn",
+  bed: "bed",
+  package: "box-alt",
+  "check-circle": "check-circle",
+  "cross-circle": "cross-circle",
 } as const;
 
 export type ServiceIconName = keyof typeof SERVICE_ICON_MAP;
 
 export const CATEGORY_FLATICON: Record<string, string> = {
   "home-services": "house-blank",
-  "construction-services": "hard-hat",
+  "construction-services": "hammer",
   "beauty-wellness": "lipstick",
+  "event-media-services": "party-horn",
+  "rental-services": "truck-bolt",
+  "vehicle-services": "wrench-simple",
+  "accommodation-services": "bed",
+  "job-opportunities": "megaphone",
+  "manpower-support-staff": "person-carry-box",
+  "custom-other-services": "apps",
   "events-media": "camera-retro",
   "equipment-rentals": "box-alt",
-  "vehicle-services": "car-side",
-  "accommodation-services": "building",
   "jobs-gigs": "briefcase",
   "manpower-support": "users-alt",
   "custom-services": "sparkles",

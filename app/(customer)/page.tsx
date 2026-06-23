@@ -22,6 +22,8 @@ import { HomeHowItWorks } from "@/components/customer/home/HomeHowItWorks";
 
 import { HomeTestimonials } from "@/components/customer/home/HomeTestimonials";
 
+import { HomeFaq } from "@/components/customer/home/HomeFaq";
+
 import { HomeReferBanner } from "@/components/customer/home/HomeReferBanner";
 
 import { HomeBottomCta } from "@/components/customer/home/HomeBottomCta";
@@ -176,6 +178,8 @@ export default async function HomePage() {
       <HomeHowItWorks />
 
       <HomeTestimonials />
+
+      <HomeFaq />
 
       <HomeReferBanner />
 

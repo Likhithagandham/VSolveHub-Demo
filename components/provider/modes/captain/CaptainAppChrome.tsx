@@ -1,12 +1,12 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ProviderNotificationBell } from "@/components/notifications/ProviderNotificationBell";
 import { CaptainTopBar } from "./CaptainTopBar";
 import { CaptainSidebar } from "./CaptainSidebar";
 import { CaptainBottomNav } from "./CaptainBottomNav";
 import { CaptainLiveOfferModal } from "./CaptainLiveOfferModal";
-import { CaptainNotificationsSheet, buildCaptainNotifications } from "./CaptainNotificationsSheet";
 import { useCaptainClock, useCaptainPoll } from "./hooks/useCaptainPoll";
 import type { CaptainOffer, CaptainProfile } from "./types";
 
@@ -26,11 +26,6 @@ export function CaptainAppChrome({ children }: Props) {
   const [offers, setOffers] = useState<CaptainOffer[]>([]);
   const [busyOffer, setBusyOffer] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
-  const [notifOpen, setNotifOpen] = useState(false);
-  const [readIds, setReadIds] = useState<Set<string>>(() => new Set());
-
-  const notifications = useMemo(() => buildCaptainNotifications(offers), [offers]);
-  const unreadCount = notifications.filter((n) => !readIds.has(n.id)).length;
 
   const poll = useCallback(async () => {
     const [profileRes, offersRes] = await Promise.all([
@@ -81,8 +76,7 @@ export function CaptainAppChrome({ children }: Props) {
         name={profile.name}
         rating={profile.rating}
         onMenu={() => setSidebarOpen(true)}
-        onNotifications={() => setNotifOpen(true)}
-        unreadCount={unreadCount}
+        notificationBell={<ProviderNotificationBell className="rapido-topbar-bell" />}
       />
       <main className="rapido-main">{children}</main>
       <CaptainBottomNav />
@@ -96,14 +90,6 @@ export function CaptainAppChrome({ children }: Props) {
           onDecline={(id) => respond(id, "decline")}
         />
       )}
-      <CaptainNotificationsSheet
-        open={notifOpen}
-        onClose={() => setNotifOpen(false)}
-        items={notifications}
-        readIds={readIds}
-        onMarkRead={(id) => setReadIds((prev) => new Set(prev).add(id))}
-        onMarkAllRead={() => setReadIds(new Set(notifications.map((n) => n.id)))}
-      />
     </div>
   );
 }
