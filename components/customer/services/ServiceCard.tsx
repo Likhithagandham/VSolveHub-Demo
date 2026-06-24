@@ -4,6 +4,13 @@ import { SERVICE_SLUG_TO_PROPERTY_TYPE } from "@/lib/accommodation/constants";
 import { getVehicleFlowHref } from "@/lib/vehicle/constants";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
 
+function formatDurationChip(duration: number, unit?: string): string | null {
+  if (duration <= 0) return null;
+  if (unit === "day") return "Full day";
+  if (unit === "night") return "Per night";
+  return `${Math.round(duration / 60)} hrs`;
+}
+
 export type ServiceCardData = {
   id: string;
   name: string;
@@ -11,7 +18,7 @@ export type ServiceCardData = {
   description: string;
   pricePaise: number;
   unit?: string;
-  duration?: string | null;
+  duration?: number;
   category: { slug: string; name: string; icon: string };
   subCategory?: { name: string; slug: string } | null;
 };
@@ -42,6 +49,7 @@ export function ServiceCard({ service }: { service: ServiceCardData }) {
   const bookHref = getBookHref(service);
   const bookLabel = getBookLabel(service);
   const metaLabel = service.subCategory?.name ?? service.category.name;
+  const durationLabel = formatDurationChip(service.duration ?? 0, service.unit);
 
   return (
     <li className="service-list__item">
@@ -59,8 +67,8 @@ export function ServiceCard({ service }: { service: ServiceCardData }) {
           <span className="service-list__title">{service.name}</span>
           <span className="service-list__meta">
             <span className="service-list__chip">{metaLabel}</span>
-            {service.duration ? (
-              <span className="service-list__chip service-list__chip--muted">{service.duration}</span>
+            {durationLabel ? (
+              <span className="service-list__chip service-list__chip--muted">{durationLabel}</span>
             ) : null}
           </span>
         </span>

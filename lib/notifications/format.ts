@@ -37,7 +37,7 @@ export function statusIcon(status: string, kind: "service" | "vehicle" | "stay" 
   if (kind === "vehicle") return "car-side";
   if (kind === "stay") return "bed";
   if (s === "ASSIGNED" || s === "ACCEPTED") return "clipboard-check";
-  if (s === "PROVIDER_ARRIVING" || s === "ON_THE_WAY" || s === "DRIVER_ARRIVING") return "motorcycle";
+  if (s === "PROVIDER_ARRIVING" || s === "ON_THE_WAY") return "motorcycle";
   return "bell";
 }
 

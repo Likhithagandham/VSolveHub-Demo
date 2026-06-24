@@ -1,1 +1,1 @@
-# SQLite database directory (dev.db is gitignored)
+# Legacy local data directory (unused — database is Neon PostgreSQL via DATABASE_URL)
